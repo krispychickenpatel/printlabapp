@@ -7,165 +7,107 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Print Lab">
 <meta name="theme-color" content="#16161A">
-<title>Print Lab — Bambu X2D</title>
+<title>Print Lab v3 — Project System</title>
 <style>
 :root{
-  --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--line:#34343C;
+  --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--surface3:#303039;--line:#34343C;
   --text:#ECECEF;--muted:#9A9AA4;--dim:#6C6C76;
-  --orange:#E0652F;--red:#E24B4A;--green:#1D9E75;--gray:#888780;--blue:#3B7DD8;--r:14px;
+  --orange:#E0652F;--red:#E24B4A;--green:#1D9E75;--gray:#888780;--blue:#3B7DD8;--yellow:#E6A93B;--r:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
-.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
-header{position:sticky;top:0;z-index:20;background:rgba(22,22,26,.92);backdrop-filter:blur(12px);border-bottom:0.5px solid var(--line);padding:calc(12px + env(safe-area-inset-top)) 16px 12px}
-.h-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.h-title{font-size:17px;font-weight:650;letter-spacing:-.2px}
-.h-sub{font-size:11px;color:var(--dim);margin-top:2px}
-.stats{display:flex;gap:8px;margin-top:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.stat{flex:0 0 auto;background:var(--surface);border:0.5px solid var(--line);border-radius:10px;padding:8px 12px;min-width:74px}
-.stat .v{font-size:18px;font-weight:650}
-.stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin-top:1px}
-main{padding:14px 16px 0}
-.view{display:none}.view.on{display:block;animation:fade .18s ease}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.view-h{font-size:13px;font-weight:600;color:var(--muted);margin:4px 2px 12px;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
-.view-h .sub{font-weight:400;color:var(--dim);text-transform:none;letter-spacing:0;font-size:12px}
-.card{background:var(--surface);border:0.5px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px}
-.swatch{display:inline-block;width:11px;height:11px;border-radius:3px;border:0.5px solid rgba(255,255,255,.12);flex-shrink:0}
-.tap{cursor:pointer}.tap:active{opacity:.8}
-.inv .top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
-.inv .name{font-size:14px;font-weight:550}
-.inv .type{font-size:10px;color:var(--dim);border:0.5px solid var(--line);border-radius:5px;padding:1px 5px;margin-left:auto}
-.bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-bottom:9px}
-.bar i{display:block;height:100%;border-radius:3px}
-.inv .ctl{display:flex;align-items:center;gap:7px}
-.grams{font-size:15px;font-weight:650;min-width:58px}
-.grams.low{color:var(--orange)}
-.grams.confirm{font-size:12px;font-weight:500;color:var(--dim);font-style:italic}
-.spend{margin-left:auto;display:flex;gap:6px}
-.chip{font-size:12px;font-weight:600;padding:7px 10px;border-radius:9px;background:var(--surface2);border:0.5px solid var(--line);color:var(--text);min-width:40px}
-.chip:active{background:var(--orange);border-color:var(--orange)}
-.chip.edit{color:var(--muted)}
-.b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
-.b-name{font-size:15px;font-weight:600;line-height:1.25}
-.b-meta{font-size:12.5px;color:var(--muted);line-height:1.55}
-.b-block{font-size:11.5px;color:var(--orange);margin-top:7px}
-.b-mats{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.pill{font-size:11px;padding:3px 8px;border-radius:20px;border:0.5px solid var(--line);color:var(--muted);display:flex;align-items:center;gap:5px}
-.badge{font-size:10.5px;font-weight:650;padding:4px 9px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px}
-.badge.active{background:rgba(29,158,117,.16);color:#3FD9A0}
-.badge.queue{background:var(--surface2);color:var(--muted)}
-.badge.done{background:rgba(59,125,216,.16);color:#7FB0F0}
-.badge.failed{background:rgba(226,75,74,.16);color:#F08785}
-.b-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
-.act{flex:1;min-width:84px;font-size:12.5px;font-weight:600;padding:9px;border-radius:9px;background:var(--surface2);border:0.5px solid var(--line);color:var(--text)}
-.act:active{opacity:.7}
-.act.primary{background:var(--orange);border-color:var(--orange);color:#fff}
-.iter{font-size:11.5px;color:var(--dim);margin-top:8px;padding-left:9px;border-left:2px solid var(--line);line-height:1.5}
-.lesson{display:flex;gap:11px;padding:11px 0;border-bottom:0.5px solid var(--line);font-size:13px}
-.lesson:last-child{border-bottom:none}
-.lesson .d{color:var(--dim);min-width:62px;flex-shrink:0;font-size:11px;padding-top:1px}
-.lesson .t{line-height:1.5}
-.add-row{display:flex;gap:8px;margin-top:10px}
-input.field,textarea.field,select.field{flex:1;background:var(--surface2);border:0.5px solid var(--line);color:var(--text);border-radius:10px;padding:11px;font-size:14px;font-family:inherit;width:100%}
-textarea.field{min-height:64px;resize:vertical}
-select.field{appearance:none}
-.btn{font-size:14px;font-weight:600;padding:11px 16px;border-radius:10px;border:none;background:var(--orange);color:#fff}
-.btn:active{opacity:.8}
-.btn.ghost{background:var(--surface2);color:var(--text);border:0.5px solid var(--line)}
-.btn.danger{background:rgba(226,75,74,.14);color:#F08785;border:0.5px solid rgba(226,75,74,.3)}
-.btn.full{width:100%}.btn.sm{font-size:12.5px;padding:9px 13px}
-.add-build{width:100%;border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:var(--r);padding:14px;font-size:13.5px;font-weight:600;margin-bottom:10px}
-.add-build:active{border-color:var(--orange);color:var(--orange)}
-.shop{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:0.5px solid var(--line)}
-.shop:last-child{border-bottom:none}
-.box{width:24px;height:24px;border-radius:7px;border:2px solid var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
-.box.on{background:var(--green);border-color:var(--green)}
-.shop .i{font-size:14px}.shop .i.got{color:var(--dim);text-decoration:line-through}
-.shop .p{font-size:11px;color:var(--dim);margin-top:2px}
-.fail{padding:11px 0;border-bottom:0.5px solid var(--line);font-size:12.5px;line-height:1.55}
-.fail:last-child{border-bottom:none}.fail .n{font-weight:650}
-.report-note{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px}
-.report-actions{display:flex;flex-direction:column;gap:9px}
-.export-box{margin-top:14px;display:none}
-.export-box textarea{width:100%;min-height:200px;font-size:11px;line-height:1.45;background:var(--surface);border:0.5px solid var(--line);color:var(--text);border-radius:10px;padding:12px}
-.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--green);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:22px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:90}
-.toast.show{opacity:1}
-.ref{font-size:12px;color:var(--muted);line-height:1.6}
-.ref table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
-.ref td{padding:6px 7px;border-bottom:0.5px solid var(--line);vertical-align:top}
-.ref td:first-child{color:var(--text);white-space:nowrap;font-weight:500}
-.ref details{margin-top:10px}.ref summary{cursor:pointer;color:var(--orange);font-size:12.5px;font-weight:600;padding:6px 0}
-.scheme{display:flex;align-items:center;gap:9px;padding:6px 0}
-.scheme .dots{display:flex;gap:3px}.scheme .nm{font-size:12px;min-width:108px}.scheme .us{font-size:11px;color:var(--dim)}
-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.94);backdrop-filter:blur(14px);border-top:0.5px solid var(--line);display:flex;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-.tab{flex:1;background:none;border:none;color:var(--dim);font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px}
-.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
-.tab.on{color:var(--orange)}
-.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s}
-.scrim.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--bg);border-top:0.5px solid var(--line);border-radius:20px 20px 0 0;padding:8px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .24s cubic-bezier(.2,.8,.2,1)}
-.sheet.on{transform:none}
-.grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 14px}
-.sheet h3{font-size:16px;font-weight:650;margin-bottom:14px}
-.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin:12px 2px 5px}
-.row2{display:flex;gap:8px}
-.color-edit{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
-.ce-pill{display:flex;align-items:center;gap:6px;background:var(--surface2);border:0.5px solid var(--line);border-radius:20px;padding:4px 6px 4px 9px;font-size:11.5px}
-.ce-x{color:var(--dim);font-weight:700;padding:0 3px}
-.sheet-actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+button,input,textarea,select{font-family:inherit}.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+header{position:sticky;top:0;z-index:20;background:rgba(22,22,26,.92);backdrop-filter:blur(12px);border-bottom:.5px solid var(--line);padding:calc(12px + env(safe-area-inset-top)) 16px 12px}
+.h-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.h-title{font-size:17px;font-weight:700;letter-spacing:-.2px}.h-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.stats{display:flex;gap:8px;margin-top:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}.stat{flex:0 0 auto;background:var(--surface);border:.5px solid var(--line);border-radius:10px;padding:8px 12px;min-width:76px}.stat .v{font-size:18px;font-weight:700}.stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin-top:1px}
+main{padding:14px 16px 0}.view{display:none}.view.on{display:block;animation:fade .18s ease}@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.view-h{font-size:13px;font-weight:700;color:var(--muted);margin:4px 2px 12px;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;gap:8px}.view-h .sub{font-weight:400;color:var(--dim);text-transform:none;letter-spacing:0;font-size:12px;text-align:right}
+.card{background:var(--surface);border:.5px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px}.card.tight{padding:11px}.tap{cursor:pointer}.tap:active{opacity:.8}.empty{font-size:12.5px;color:var(--dim);line-height:1.55}.muted{color:var(--muted)}.dim{color:var(--dim)}
+.btn{font-size:14px;font-weight:650;padding:11px 16px;border-radius:10px;border:none;background:var(--orange);color:#fff}.btn:active{opacity:.8}.btn.ghost{background:var(--surface2);color:var(--text);border:.5px solid var(--line)}.btn.danger{background:rgba(226,75,74,.14);color:#F08785;border:.5px solid rgba(226,75,74,.3)}.btn.full{width:100%}.btn.sm{font-size:12.5px;padding:9px 13px}.btn.mini{font-size:11.5px;padding:6px 9px;border-radius:8px}
+.add-build{width:100%;border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:var(--r);padding:14px;font-size:13.5px;font-weight:650;margin-bottom:10px}.add-build:active{border-color:var(--orange);color:var(--orange)}
+.swatch{display:inline-block;width:11px;height:11px;border-radius:3px;border:.5px solid rgba(255,255,255,.12);flex-shrink:0}.swatch.big{width:18px;height:18px;border-radius:5px}.dotrow{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.badge{font-size:10.5px;font-weight:750;padding:4px 9px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px}.badge.active{background:rgba(29,158,117,.16);color:#3FD9A0}.badge.queue{background:var(--surface2);color:var(--muted)}.badge.done{background:rgba(59,125,216,.16);color:#7FB0F0}.badge.failed{background:rgba(226,75,74,.16);color:#F08785}.badge.warn{background:rgba(230,169,59,.14);color:#F0C06A}.badge.ok{background:rgba(29,158,117,.14);color:#3FD9A0}
+.pill{font-size:11px;padding:3px 8px;border-radius:20px;border:.5px solid var(--line);color:var(--muted);display:inline-flex;align-items:center;gap:5px;max-width:100%}.pill.on{color:#fff;background:var(--orange);border-color:var(--orange)}.pill.green{color:#3FD9A0;border-color:rgba(29,158,117,.35);background:rgba(29,158,117,.09)}.pill.red{color:#F08785;border-color:rgba(226,75,74,.35);background:rgba(226,75,74,.08)}.pill.blue{color:#7FB0F0;border-color:rgba(59,125,216,.35);background:rgba(59,125,216,.08)}
+.seg{display:flex;gap:6px;overflow-x:auto;margin:0 0 12px;-webkit-overflow-scrolling:touch}.seg button{flex:0 0 auto;background:var(--surface);border:.5px solid var(--line);color:var(--muted);border-radius:20px;padding:8px 11px;font-size:12px;font-weight:650}.seg button.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv .mini-card{background:var(--surface2);border:.5px solid var(--line);border-radius:12px;padding:11px}.mini-card .v{font-size:19px;font-weight:750}.mini-card .l{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.45px;margin-top:1px}
+.dash-item{padding:10px 0;border-bottom:.5px solid var(--line);font-size:13px;line-height:1.45}.dash-item:last-child{border-bottom:none}.dash-item .t{font-weight:650}.dash-item .s{font-size:11.5px;color:var(--dim);margin-top:2px}
+.inv .top{display:flex;align-items:center;gap:9px;margin-bottom:9px}.inv .name{font-size:14px;font-weight:600}.inv .type{font-size:10px;color:var(--dim);border:.5px solid var(--line);border-radius:5px;padding:1px 5px;margin-left:auto}.bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-bottom:9px}.bar i{display:block;height:100%;border-radius:3px}.inv .ctl{display:flex;align-items:center;gap:7px}.grams{font-size:15px;font-weight:750;min-width:58px}.grams.low{color:var(--orange)}.grams.confirm{font-size:12px;font-weight:500;color:var(--dim);font-style:italic}.spend{margin-left:auto;display:flex;gap:6px}.chip{font-size:12px;font-weight:650;padding:7px 10px;border-radius:9px;background:var(--surface2);border:.5px solid var(--line);color:var(--text);min-width:40px}.chip:active{background:var(--orange);border-color:var(--orange)}.chip.edit{color:var(--muted)}
+.hw-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.hw-name{font-size:14px;font-weight:650}.hw-meta{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.45}.qty{font-size:18px;font-weight:750;text-align:right}.qty.low{color:var(--orange)}
+.b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}.b-name{font-size:15px;font-weight:700;line-height:1.25}.b-meta{font-size:12.5px;color:var(--muted);line-height:1.55}.b-block{font-size:11.5px;color:var(--orange);margin-top:7px}.b-next{font-size:12px;color:#F0C06A;margin-top:7px;line-height:1.45}.b-mats{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.b-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}.act{flex:1;min-width:86px;font-size:12.5px;font-weight:650;padding:9px;border-radius:9px;background:var(--surface2);border:.5px solid var(--line);color:var(--text)}.act.primary{background:var(--orange);border-color:var(--orange);color:#fff}.act:active{opacity:.7}
+.reqgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.reqbox{background:var(--surface2);border:.5px solid var(--line);border-radius:10px;padding:9px;font-size:11.5px;color:var(--muted);line-height:1.35}.reqbox b{display:block;color:var(--text);font-size:12.5px;margin-bottom:2px}.reqbox.miss{border-color:rgba(226,75,74,.35);background:rgba(226,75,74,.07)}.reqbox.ok{border-color:rgba(29,158,117,.35);background:rgba(29,158,117,.07)}
+.progress{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-top:10px}.progress i{display:block;height:100%;background:var(--green);border-radius:3px}.iter{font-size:11.5px;color:var(--dim);margin-top:8px;padding-left:9px;border-left:2px solid var(--line);line-height:1.5}
+.know-card .k-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px}.know-card .k-title{font-size:14px;font-weight:700}.know-card .k-body{font-size:12.5px;color:var(--muted);line-height:1.55;white-space:pre-wrap}.know-card .k-meta{font-size:11px;color:var(--dim);margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}.search{margin-bottom:10px}
+.shop{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:.5px solid var(--line)}.shop:last-child{border-bottom:none}.box{width:24px;height:24px;border-radius:7px;border:2px solid var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;margin-top:1px}.box.on{background:var(--green);border-color:var(--green)}.shop .i{font-size:14px;font-weight:600;line-height:1.3}.shop .i.got{color:var(--dim);text-decoration:line-through}.shop .p{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.35}.shop .right{margin-left:auto;text-align:right;flex-shrink:0}.need{padding:12px 0;border-bottom:.5px solid var(--line)}.need:last-child{border-bottom:none}.need-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.need-name{font-size:14px;font-weight:700}.need-meta{font-size:11.5px;color:var(--dim);line-height:1.45;margin-top:4px}.need-buy{font-size:13px;font-weight:750;color:var(--orange);white-space:nowrap}.proj-list{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.45}
+.ref{font-size:12px;color:var(--muted);line-height:1.6}.ref table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}.ref td{padding:6px 7px;border-bottom:.5px solid var(--line);vertical-align:top}.ref td:first-child{color:var(--text);white-space:nowrap;font-weight:600}.scheme{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:.5px solid var(--line)}.scheme:last-child{border-bottom:none}.scheme .dots{display:flex;gap:3px}.scheme .nm{font-size:12.5px;min-width:108px;font-weight:650}.scheme .us{font-size:11.5px;color:var(--dim);line-height:1.35}
+.add-row{display:flex;gap:8px;margin-top:10px}input.field,textarea.field,select.field{flex:1;background:var(--surface2);border:.5px solid var(--line);color:var(--text);border-radius:10px;padding:11px;font-size:14px;width:100%}textarea.field{min-height:76px;resize:vertical}select.field{appearance:none}.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin:12px 2px 5px}.row2{display:flex;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.edit-list{display:flex;flex-direction:column;gap:7px;margin-top:6px}.edit-item{display:flex;align-items:center;gap:8px;justify-content:space-between;background:var(--surface2);border:.5px solid var(--line);border-radius:10px;padding:8px 9px;font-size:12px;line-height:1.35}.edit-item .main{min-width:0}.edit-item .sub{font-size:10.8px;color:var(--dim);margin-top:2px}.x{color:var(--dim);font-weight:800;font-size:16px;padding:2px 5px}.checkline{display:flex;align-items:center;gap:8px}.checkline input{width:18px;height:18px;accent-color:var(--orange)}
+.report-note{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px}.report-actions{display:flex;flex-direction:column;gap:9px}.export-box{margin-top:14px;display:none}.export-box textarea{width:100%;min-height:230px;font-size:11px;line-height:1.45;background:var(--surface);border:.5px solid var(--line);color:var(--text);border-radius:10px;padding:12px}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--green);color:#fff;font-size:13px;font-weight:650;padding:10px 18px;border-radius:22px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:90;white-space:nowrap}.toast.show{opacity:1}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.94);backdrop-filter:blur(14px);border-top:.5px solid var(--line);display:flex;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}.tab{flex:1;background:none;border:none;color:var(--dim);font-size:9.5px;font-weight:650;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 1px}.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}.tab.on{color:var(--orange)}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s}.scrim.on{opacity:1;pointer-events:auto}.sheet{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--bg);border-top:.5px solid var(--line);border-radius:20px 20px 0 0;padding:8px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .24s cubic-bezier(.2,.8,.2,1)}.sheet.on{transform:none}.grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 14px}.sheet h3{font-size:16px;font-weight:750;margin-bottom:14px}.sheet-actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+@media (max-width:390px){main{padding-left:12px;padding-right:12px}.reqgrid{grid-template-columns:1fr}.row3{grid-template-columns:1fr}.tab{font-size:8.8px}.tab svg{width:20px;height:20px}.btn{padding-left:13px;padding-right:13px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-
 <header>
   <div class="h-row">
-    <div><div class="h-title">Print Lab · Bambu X2D</div><div class="h-sub" id="updated">—</div></div>
+    <div><div class="h-title">Print Lab · Project System</div><div class="h-sub" id="updated">—</div></div>
     <button class="btn sm ghost" onclick="go('report')">Report ↗</button>
   </div>
   <div class="stats" id="stats"></div>
 </header>
 
 <main>
-  <section class="view on" id="v-inv">
+  <section class="view on" id="v-dash">
+    <div class="view-h">Dashboard <span class="sub" id="dash-sub"></span></div>
+    <div id="dash-main"></div>
+  </section>
+
+  <section class="view" id="v-inv">
     <div class="view-h">Inventory <span class="sub" id="inv-sub"></span></div>
+    <div class="seg"><button id="inv-fil-btn" onclick="setInvMode('filament')">Filament</button><button id="inv-hw-btn" onclick="setInvMode('hardware')">Hardware</button></div>
     <div id="inv-list"></div>
-    <button class="add-build" onclick="openInv(-1)">+ Add spool</button>
   </section>
 
-  <section class="view" id="v-builds">
-    <div class="view-h">Projects <span class="sub" id="builds-sub"></span></div>
-    <button class="add-build" onclick="openBuild(-1)">+ New project</button>
-    <div id="builds-list"></div>
+  <section class="view" id="v-projects">
+    <div class="view-h">Projects <span class="sub" id="projects-sub"></span></div>
+    <div class="seg" id="project-filters"></div>
+    <button class="add-build" onclick="openProject(-1)">+ New project</button>
+    <div id="projects-list"></div>
   </section>
 
-  <section class="view" id="v-log">
-    <div class="view-h">Lessons</div>
-    <div class="card">
-      <div id="lessons-list"></div>
-      <div class="add-row"><input class="field" id="lesson-in" placeholder="New lesson learned…"></div>
-      <div style="margin-top:9px"><button class="btn sm" onclick="addLesson()">Log lesson</button></div>
-    </div>
-    <div class="view-h" style="margin-top:18px">Failures / issues</div>
-    <div class="card" id="fail-card"></div>
+  <section class="view" id="v-knowledge">
+    <div class="view-h">Knowledge Base <span class="sub" id="knowledge-sub"></span></div>
+    <input class="field search" id="knowledge-search" placeholder="Search material, tolerance, setting, lesson…" oninput="renderKnowledge()">
+    <div class="seg" id="knowledge-filters"></div>
+    <button class="add-build" onclick="openKnowledge(-1)">+ Add knowledge</button>
+    <div id="knowledge-list"></div>
+    <div class="view-h" style="margin-top:18px">Reference Standards <span class="sub">editable</span></div>
+    <div class="card ref" id="standards-card"></div>
+    <button class="add-build" onclick="openStandard(-1)">+ Add reference rule</button>
+    <div class="view-h" style="margin-top:18px">Colour Schemes <span class="sub">apply to projects</span></div>
+    <div class="card" id="scheme-card"></div>
+    <button class="add-build" onclick="openScheme(-1)">+ Add colour scheme</button>
   </section>
 
-  <section class="view" id="v-shop">
-    <div class="view-h">SAYAL list <span class="sub" id="shop-sub"></span></div>
-    <div class="card" id="shop-list"></div>
-    <div class="view-h" style="margin-top:18px">Reference</div>
-    <div class="card ref" id="ref-card"></div>
+  <section class="view" id="v-proc">
+    <div class="view-h">Procurement <span class="sub" id="proc-sub"></span></div>
+    <div id="auto-proc"></div>
+    <div class="view-h" style="margin-top:18px">Manual List <span class="sub">extras / wants / tools</span></div>
+    <button class="add-build" onclick="openProcItem(-1)">+ Add manual item</button>
+    <div class="card" id="manual-proc"></div>
   </section>
 
   <section class="view" id="v-report">
     <div class="view-h">Report</div>
     <div class="card">
-      <div class="report-note">This app lives on your phone. Your Claude project is what a new conversation reads. Generate a report and upload it so the two stay in sync — that <b>is</b> the live loop.</div>
+      <div class="report-note">Generate a current project-state report for Claude, backups, or your own records. This version is project-centric: projects generate procurement, consume inventory, and reference knowledge.</div>
       <div class="report-actions">
         <button class="btn full" onclick="genMarkdown()">Generate Markdown · for project</button>
-        <button class="btn full ghost" onclick="copyAIPrompt()">Copy AI summary prompt · paste into Claude</button>
+        <button class="btn full ghost" onclick="copyAIPrompt()">Copy AI summary prompt</button>
+        <button class="btn full ghost" onclick="exportJSON()">Export JSON backup</button>
+        <button class="btn full ghost" onclick="importJSON()">Import JSON backup</button>
         <button class="btn full ghost" onclick="savePDF()">Save as PDF · for records</button>
       </div>
       <div class="export-box" id="export-box">
@@ -178,16 +120,17 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
     </div>
     <div class="card">
       <div class="view-h" style="margin:0 0 10px">Maintenance</div>
-      <button class="btn sm ghost" onclick="resetData()">Reset to handoff data</button>
+      <button class="btn sm ghost" onclick="resetData()">Reset to v3 starter data</button>
     </div>
   </section>
 </main>
 
 <nav>
+  <button class="tab" data-v="dash" onclick="go('dash')"><svg viewBox="0 0 24 24"><path d="M4 13h7V4H4zM13 20h7V4h-7zM4 20h7v-5H4z"/></svg>Dash</button>
   <button class="tab" data-v="inv" onclick="go('inv')"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>Inventory</button>
-  <button class="tab" data-v="builds" onclick="go('builds')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2.5M12 17.5V20M4 12h2.5M17.5 12H20M6.3 6.3l1.8 1.8M15.9 15.9l1.8 1.8M17.7 6.3l-1.8 1.8M8.1 15.9l-1.8 1.8"/></svg>Projects</button>
-  <button class="tab" data-v="log" onclick="go('log')"><svg viewBox="0 0 24 24"><path d="M5 4h14v16l-7-3-7 3z"/></svg>Lessons</button>
-  <button class="tab" data-v="shop" onclick="go('shop')"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H3M9 20a1 1 0 100-2 1 1 0 000 2zM17 20a1 1 0 100-2 1 1 0 000 2z"/></svg>SAYAL</button>
+  <button class="tab" data-v="projects" onclick="go('projects')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2.5M12 17.5V20M4 12h2.5M17.5 12H20M6.3 6.3l1.8 1.8M15.9 15.9l1.8 1.8M17.7 6.3l-1.8 1.8M8.1 15.9l-1.8 1.8"/></svg>Projects</button>
+  <button class="tab" data-v="knowledge" onclick="go('knowledge')"><svg viewBox="0 0 24 24"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M8 8h8M8 12h6"/></svg>Knowledge</button>
+  <button class="tab" data-v="proc" onclick="go('proc')"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H3M9 20a1 1 0 100-2 1 1 0 000 2zM17 20a1 1 0 100-2 1 1 0 000 2z"/></svg>Buy</button>
   <button class="tab" data-v="report" onclick="go('report')"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>Report</button>
 </nav>
 
@@ -196,277 +139,341 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY='printlab_app_v2';
-function freshData(){return{
-  updated:null,materialUsed:0,
-  builds:[
-    {id:'b001',name:'Mechanical business card',status:'active',phase:1,started:'Jun 2026',
-     notes:'Design phase — Fusion base plate next. 110×70×12mm. Gear train, rack & pinion, ratchet + pawl.',
-     blocking:'Fusion 360 install',est:'~83g mixed',used:0,
-     colors:[['#2C2C2A','PETG Black base'],['#444441','PLA Charcoal cover'],['#E0652F','PLA Orange drive gear'],['#888780','PLA Ash Gray driven'],['#E24B4A','PLA Red pawl']],iter:[]},
-    {id:'b002',name:'Desk vise',status:'queue',phase:1,notes:'Leadscrew-driven functional tool.',blocking:'Threaded rod from SAYAL',est:'~120g PETG',used:0,colors:[],iter:[]},
-    {id:'b003',name:'Articulating landing gear',status:'queue',phase:1,notes:'Oleo strut + scissors linkage. AME-relevant.',blocking:'Fusion comfort level',est:'~200g mixed',used:0,colors:[],iter:[]},
-    {id:'b004',name:'Single cylinder engine',status:'queue',phase:3,notes:'Fully articulating, every part self-designed. Portfolio piece. (Doc: queue says P1 capstone, roadmap says P3 — reconcile.)',blocking:'Landing gear first',est:'~400g+ mixed',used:0,colors:[],iter:[]}
-  ],
-  completed:[
-    {name:'Spring fidget knife',material:'PLA Matte',date:'Jun 2026',result:'Excellent — snaps and holds detent'},
-    {name:'Spring fidget knife',material:'PETG Black',date:'Jun 2026',result:'Functional but slides — detent fails'}
-  ],
-  failed:[],
-  lessons:[
-    {date:'Jun 2026',text:'PETG creeps under spring load — fidget knife detent failed. PLA holds snap. Never PETG for spring/detent members.'},
-    {date:'Jun 2026',text:'Material choice is per-component, not per-print. Same assembly can use both PLA and PETG.'}
-  ],
-  inv:[
-    {name:'PLA Matte White',type:'PLA',c:'#F0EEE8',g:400},
-    {name:'PLA Mandarin Orange',type:'PLA',c:'#E0652F',g:1000},
-    {name:'PLA Scarlet Red',type:'PLA',c:'#E24B4A',g:1000},
-    {name:'PLA Charcoal Black',type:'PLA',c:'#444441',g:1000},
-    {name:'PLA Lilac Purple',type:'PLA',c:'#7F77DD',g:1000},
-    {name:'PLA Ash Gray',type:'PLA',c:'#888780',g:1000},
-    {name:'PETG Black',type:'PETG',c:'#2C2C2A',g:600},
-    {name:'PETG Navy Blue',type:'PETG',c:'#185FA5',g:1000},
-    {name:'PETG Transparent',type:'PETG',c:'#B5D4F4',g:null},
-    {name:'PETG Orange',type:'PETG',c:'#EF9F27',g:null},
-    {name:'PVA Clear',type:'PVA',c:'#E1F5EE',g:500}
-  ],
-  shop:[
-    {i:'M3/M4/M5 heat-set brass inserts',p:'Pivot holes, threaded joints',got:false},
-    {i:'Compression springs (assorted)',p:'Pawl spring, shock strut analog',got:false},
-    {i:'Threaded rod M6/M8 + nuts',p:'Desk vise leadscrew',got:false},
-    {i:'608 bearings ×6+',p:'Gear shaft housings',got:false},
-    {i:'M3 screws + nuts (100pc)',p:'General assembly hardware',got:false}
-  ],
-  rules:[['Snap fits, detents','PLA','Holds snap, no creep'],['Sustained spring load','PLA','PETG creeps (fidget knife)'],['Chassis, housings','PETG','Dimensional stability'],['Sliding surfaces','PETG','Wear resistance'],['Gear faces','PLA/PLA or PLA/PETG','Lower friction'],['Axle pins, shear','PETG','Toughness'],['Outdoor / heat','PETG','Higher Tg'],['Complex overhangs','PVA','Dissolves clean'],['Display / low stress','PLA Matte','Best finish']],
-  schemes:[['Mechanical',['#2C2C2A','#E0652F','#888780','#444441','#E24B4A'],'Business card, display'],['Studio',['#444441','#E0652F','#888780'],'Desk tools'],['Ocean/Night',['#185FA5','#2C2C2A','#F0EEE8'],'Planters, geometric'],['Arcane',['#7F77DD','#E24B4A','#444441'],'Terrain, dice'],['Warm Neutral',['#E0652F','#F0EEE8','#888780'],'Planters, kitchen'],['Aircraft',['#888780','#F0EEE8','#185FA5'],'AME models']]
-};}
-
+const KEY='printlab_app_v3';
+const OLDKEY='printlab_app_v2';
 let D;
-function load(){try{const r=localStorage.getItem(KEY);D=r?JSON.parse(r):freshData();}catch(e){D=freshData();}}
-function save(){D.updated=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){}renderStats();}
+let invMode='filament';
+let projectFilter='open';
+let knowledgeFilter='all';
+let AUTO_CACHE={};
+let editMaterials=[],editHardware=[],editTasks=[],editColors=[],editKnowledgeIds=[];
+let schemeColors=[];
+
+function uid(p='id'){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function norm(s){return (s||'').toString().trim().toLowerCase().replace(/\s+/g,' ');}
 function esc(s){return(s==null?'':''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function mon(){return new Date().toLocaleDateString('en-CA',{month:'short',year:'numeric'});}
 function day(){return new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1700);}
-function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));document.getElementById('v-'+v).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));window.scrollTo(0,0);}
+function copyText(txt,msg){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(msg)).catch(()=>fallbackCopy(txt,msg));}else fallbackCopy(txt,msg);}
+function fallbackCopy(txt,msg){const t=document.getElementById('export-text');t.value=txt;showExport();t.focus();t.select();t.setSelectionRange(0,99999);try{document.execCommand('copy');toast(msg);}catch(e){toast('Select & copy manually');}}
+function fmtQty(n,u){const v=(Math.round((Number(n)||0)*100)/100).toString();return `${v}${u&&u!=='pcs'?' '+u:''}`;}
+function findFil(id){return D.inv.filament.find(x=>x.id===id);}function findHw(id){return D.inv.hardware.find(x=>x.id===id);}function byId(arr,id){return arr.find(x=>x.id===id);}function statusOpen(s){return s==='active'||s==='queue';}
 
+function freshData(){return{
+  version:3,updated:null,materialUsed:0,
+  inv:{
+    filament:[
+      {id:'f001',name:'PLA Matte White',type:'PLA',c:'#F0EEE8',g:400,spool:1000,cost:null},
+      {id:'f002',name:'PLA Mandarin Orange',type:'PLA',c:'#E0652F',g:1000,spool:1000,cost:null},
+      {id:'f003',name:'PLA Scarlet Red',type:'PLA',c:'#E24B4A',g:1000,spool:1000,cost:null},
+      {id:'f004',name:'PLA Charcoal Black',type:'PLA',c:'#444441',g:1000,spool:1000,cost:null},
+      {id:'f005',name:'PLA Lilac Purple',type:'PLA',c:'#7F77DD',g:1000,spool:1000,cost:null},
+      {id:'f006',name:'PLA Ash Gray',type:'PLA',c:'#888780',g:1000,spool:1000,cost:null},
+      {id:'f007',name:'PETG Black',type:'PETG',c:'#2C2C2A',g:600,spool:1000,cost:null},
+      {id:'f008',name:'PETG Navy Blue',type:'PETG',c:'#185FA5',g:1000,spool:1000,cost:null},
+      {id:'f009',name:'PETG Transparent',type:'PETG',c:'#B5D4F4',g:null,spool:1000,cost:null},
+      {id:'f010',name:'PETG Orange',type:'PETG',c:'#EF9F27',g:null,spool:1000,cost:null},
+      {id:'f011',name:'PVA Clear',type:'PVA',c:'#E1F5EE',g:500,spool:500,cost:null}
+    ],
+    hardware:[
+      {id:'h001',name:'M3 heat-set brass inserts',category:'Fasteners',qty:0,unit:'pcs',min:20,notes:'Threaded joints and durable screw bosses'},
+      {id:'h002',name:'M3 screws + nuts',category:'Fasteners',qty:0,unit:'pcs',min:50,notes:'General assemblies'},
+      {id:'h003',name:'Compression springs',category:'Motion',qty:0,unit:'pcs',min:6,notes:'Pawl springs, detents, shock analogs'},
+      {id:'h004',name:'608 bearings',category:'Bearings',qty:0,unit:'pcs',min:6,notes:'Gear shafts and rotating assemblies'},
+      {id:'h005',name:'M6/M8 threaded rod + nuts',category:'Motion',qty:0,unit:'pcs',min:1,notes:'Desk vise leadscrew'}
+    ]
+  },
+  projects:[
+    {id:'b001',name:'Mechanical business card',type:'Mechanical',status:'active',priority:1,phase:1,started:'Jun 2026',nextAction:'Install Fusion 360 and model the base plate',blocking:'Fusion 360 install',notes:'110×70×12mm. Gear train, rack & pinion, ratchet + pawl. Design phase.',est:83,used:0,schemeId:'s001',colors:[{hex:'#2C2C2A',label:'PETG Black base'},{hex:'#444441',label:'PLA Charcoal cover'},{hex:'#E0652F',label:'PLA Orange drive gear'},{hex:'#888780',label:'PLA Ash Gray driven'},{hex:'#E24B4A',label:'PLA Red pawl'}],materials:[{id:'m001',invId:'f002',name:'PLA Mandarin Orange',type:'PLA',color:'#E0652F',grams:40},{id:'m002',invId:'f006',name:'PLA Ash Gray',type:'PLA',color:'#888780',grams:30},{id:'m003',invId:'f007',name:'PETG Black',type:'PETG',color:'#2C2C2A',grams:60}],hardware:[{id:'r001',invId:'h001',name:'M3 heat-set brass inserts',qty:8,unit:'pcs'},{id:'r002',invId:'h002',name:'M3 screws + nuts',qty:16,unit:'pcs'},{id:'r003',invId:'h003',name:'Compression springs',qty:2,unit:'pcs'}],tasks:[{id:'t001',text:'Fusion base plate',done:false},{id:'t002',text:'Gear train layout',done:false},{id:'t003',text:'Ratchet + pawl tolerance test',done:false}],knowledgeIds:['k001','k002'],iterations:[]},
+    {id:'b002',name:'Desk vise',type:'Tool',status:'queue',priority:2,phase:1,started:null,nextAction:'Buy leadscrew hardware, then model jaws around rod diameter',blocking:'Threaded rod from SAYAL / hardware store',notes:'Leadscrew-driven functional tool.',est:120,used:0,schemeId:'s002',colors:[],materials:[{id:'m004',invId:'f007',name:'PETG Black',type:'PETG',color:'#2C2C2A',grams:150}],hardware:[{id:'r004',invId:'h005',name:'M6/M8 threaded rod + nuts',qty:1,unit:'pcs'},{id:'r005',invId:'h001',name:'M3 heat-set brass inserts',qty:8,unit:'pcs'}],tasks:[{id:'t004',text:'Buy threaded rod',done:false},{id:'t005',text:'Measure rod/nut dimensions',done:false}],knowledgeIds:[],iterations:[]},
+    {id:'b003',name:'Articulating landing gear',type:'Aircraft',status:'queue',priority:3,phase:1,started:null,nextAction:'Build smaller linkage tolerance test before full assembly',blocking:'Fusion comfort level',notes:'Oleo strut + scissors linkage. AME-relevant portfolio model.',est:200,used:0,schemeId:'s006',colors:[],materials:[{id:'m005',invId:'f006',name:'PLA Ash Gray',type:'PLA',color:'#888780',grams:100},{id:'m006',invId:'f008',name:'PETG Navy Blue',type:'PETG',color:'#185FA5',grams:100}],hardware:[{id:'r006',invId:'h004',name:'608 bearings',qty:4,unit:'pcs'},{id:'r007',invId:'h002',name:'M3 screws + nuts',qty:30,unit:'pcs'},{id:'r008',invId:'h003',name:'Compression springs',qty:2,unit:'pcs'}],tasks:[{id:'t006',text:'Research linkage proportions',done:false},{id:'t007',text:'Print hinge tolerance coupon',done:false}],knowledgeIds:[],iterations:[]},
+    {id:'b004',name:'Single cylinder engine',type:'Mechanical',status:'queue',priority:4,phase:3,started:null,nextAction:'Wait until landing gear project proves linkage tolerances',blocking:'Landing gear first',notes:'Fully articulating, every part self-designed. Portfolio piece.',est:400,used:0,schemeId:'s001',colors:[],materials:[],hardware:[{id:'r009',invId:'h004',name:'608 bearings',qty:2,unit:'pcs'},{id:'r010',invId:'h002',name:'M3 screws + nuts',qty:40,unit:'pcs'}],tasks:[],knowledgeIds:[],iterations:[]}
+  ],
+  knowledge:[
+    {id:'k001',date:'Jun 2026',category:'Materials',title:'PETG creeps under sustained spring load',material:'PETG',diameter:'',tags:'spring,detent,creep',body:'PETG worked mechanically but the spring fidget knife detent slid over time. Avoid PETG for snap/detent members held under constant load.'},
+    {id:'k002',date:'Jun 2026',category:'Materials',title:'PLA holds snap and detent features better',material:'PLA',diameter:'',tags:'snap fit,detent',body:'PLA Matte held the spring fidget knife detent well. Use PLA for snap fits, pawls, and crisp detents unless heat resistance is required.'},
+    {id:'k003',date:'Jun 2026',category:'Workflow',title:'Material choice is per-component',material:'',diameter:'',tags:'assembly,design',body:'Do not choose one material for the whole assembly by default. Same project can use PLA for snap parts and PETG for frames or sliding surfaces.'}
+  ],
+  procurement:{manual:[
+    {id:'p001',name:'Digital calipers',category:'Tools',qty:1,unit:'pcs',source:'Amazon / Sayal',projectId:'',got:false,notes:'Useful for hardware measurements and tolerance coupons'},
+    {id:'p002',name:'Deburring tool / small files',category:'Tools',qty:1,unit:'set',source:'Amazon / Princess Auto',projectId:'',got:false,notes:'Clean holes, edges, support scars'}
+  ]},
+  standards:[
+    {id:'st001',topic:'Snap fits / detents',recommendation:'PLA',notes:'Holds snap better; PETG creep observed under spring load'},
+    {id:'st002',topic:'Sustained spring load',recommendation:'PLA or metal hardware',notes:'Avoid PETG for loaded detents/pawls'},
+    {id:'st003',topic:'Chassis / housings',recommendation:'PETG',notes:'Good toughness and dimensional stability'},
+    {id:'st004',topic:'Sliding surfaces',recommendation:'PETG',notes:'Better wear resistance than basic PLA'},
+    {id:'st005',topic:'Gear faces',recommendation:'PLA/PLA or PLA/PETG',notes:'Prototype and compare noise/friction'},
+    {id:'st006',topic:'Axle pins / shear',recommendation:'PETG or metal',notes:'Prefer metal for high load'},
+    {id:'st007',topic:'Outdoor / heat',recommendation:'PETG / ASA',notes:'PLA can soften in heat'},
+    {id:'st008',topic:'Complex overhangs',recommendation:'PVA support',notes:'Dissolves cleanly'},
+    {id:'st009',topic:'Display / low stress',recommendation:'PLA Matte',notes:'Best surface finish'}
+  ],
+  schemes:[
+    {id:'s001',name:'Mechanical',colors:[{hex:'#2C2C2A',label:'PETG Black'},{hex:'#E0652F',label:'Orange accent'},{hex:'#888780',label:'Ash Gray'},{hex:'#444441',label:'Charcoal'},{hex:'#E24B4A',label:'Red marker'}],use:'Business card, mechanical display'},
+    {id:'s002',name:'Studio',colors:[{hex:'#444441',label:'Charcoal'},{hex:'#E0652F',label:'Orange accent'},{hex:'#888780',label:'Ash Gray'}],use:'Desk tools and fixtures'},
+    {id:'s003',name:'Ocean/Night',colors:[{hex:'#185FA5',label:'Navy Blue'},{hex:'#2C2C2A',label:'PETG Black'},{hex:'#F0EEE8',label:'Matte White'}],use:'Planters, geometric pieces'},
+    {id:'s004',name:'Arcane',colors:[{hex:'#7F77DD',label:'Lilac'},{hex:'#E24B4A',label:'Scarlet'},{hex:'#444441',label:'Charcoal'}],use:'Terrain, dice, display'},
+    {id:'s005',name:'Warm Neutral',colors:[{hex:'#E0652F',label:'Orange'},{hex:'#F0EEE8',label:'White'},{hex:'#888780',label:'Ash Gray'}],use:'Planters and kitchen items'},
+    {id:'s006',name:'Aircraft',colors:[{hex:'#888780',label:'Ash Gray'},{hex:'#F0EEE8',label:'Matte White'},{hex:'#185FA5',label:'Navy Blue'}],use:'AME models, landing gear, aircraft systems'}
+  ]
+};}
+
+function migrateV2(o){
+  const n=freshData();
+  n.updated=o.updated||null;n.materialUsed=o.materialUsed||0;
+  if(Array.isArray(o.inv)) n.inv.filament=o.inv.map((m,i)=>({id:'f'+(i+1).toString().padStart(3,'0'),name:m.name||'Filament',type:m.type||'Other',c:m.c||'#888780',g:m.g==null?null:Number(m.g)||0,spool:1000,cost:null}));
+  const oldBuilds=Array.isArray(o.builds)?o.builds:[];
+  const completed=Array.isArray(o.completed)?o.completed:[];
+  n.projects=oldBuilds.map((b,i)=>({id:b.id||uid('b'),name:b.name||'Untitled project',type:'General',status:b.status||'queue',priority:i+1,phase:b.phase||null,started:b.started||null,nextAction:'',blocking:b.blocking||'',notes:b.notes||'',est:parseFloat((b.est||'').replace(/[^0-9.]/g,''))||0,used:b.used||0,schemeId:'',colors:(b.colors||[]).map(c=>({hex:c[0],label:c[1]})),materials:[],hardware:[],tasks:[],knowledgeIds:[],iterations:(b.iter||[]).map(x=>({id:uid('it'),date:x.date||day(),rev:'',problem:x.note||'',fix:'',result:''}))}));
+  completed.forEach((c,i)=>n.projects.push({id:uid('b'),name:c.name||'Completed print',type:'General',status:'done',priority:99+i,phase:null,started:null,doneDate:c.date||'',nextAction:'',blocking:'',notes:c.result||'',est:0,used:0,schemeId:'',colors:[],materials:[],hardware:[],tasks:[],knowledgeIds:[],iterations:[]}));
+  if(Array.isArray(o.lessons)) n.knowledge=o.lessons.map((l,i)=>({id:'k'+(i+1).toString().padStart(3,'0'),date:l.date||mon(),category:'Lessons',title:(l.text||'Lesson').slice(0,60),material:'',diameter:'',tags:'migrated',body:l.text||''}));
+  if(Array.isArray(o.failed)) o.failed.forEach(f=>n.knowledge.push({id:uid('k'),date:f.date||mon(),category:'Failures',title:f.name||'Failure',material:'',diameter:'',tags:'failure,migrated',body:`${f.failureMode||''}${f.fix?'\nFix: '+f.fix:''}`}));
+  if(Array.isArray(o.shop)) n.procurement.manual=o.shop.map((s,i)=>({id:'p'+(i+1).toString().padStart(3,'0'),name:s.i||'Item',category:'Hardware',qty:1,unit:'pcs',source:'Sayal',projectId:'',got:!!s.got,notes:s.p||''}));
+  if(Array.isArray(o.rules)) n.standards=o.rules.map((r,i)=>({id:'st'+(i+1).toString().padStart(3,'0'),topic:r[0]||'',recommendation:r[1]||'',notes:r[2]||''}));
+  if(Array.isArray(o.schemes)) n.schemes=o.schemes.map((s,i)=>({id:'s'+(i+1).toString().padStart(3,'0'),name:s[0]||'Scheme',colors:(s[1]||[]).map(hex=>({hex,label:hex})),use:s[2]||''}));
+  return n;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){D=JSON.parse(r);normalizeData();return;}const old=localStorage.getItem(OLDKEY);D=old?migrateV2(JSON.parse(old)):freshData();save(true);}catch(e){D=freshData();}}
+function normalizeData(){
+  if(!D.inv)D.inv={filament:[],hardware:[]}; if(Array.isArray(D.inv)){D=migrateV2(D);return;}
+  D.inv.filament=D.inv.filament||[];D.inv.hardware=D.inv.hardware||[];D.projects=D.projects||[];D.knowledge=D.knowledge||[];D.procurement=D.procurement||{manual:[]};D.procurement.manual=D.procurement.manual||[];D.standards=D.standards||[];D.schemes=D.schemes||[];
+  D.version=3;
+}
+function save(silent){D.updated=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){}if(!silent)renderStats();}
+
+function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));document.getElementById('v-'+v).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));window.scrollTo(0,0);renderAll();}
 function renderStats(){
-  const active=D.builds.filter(b=>b.status==='active').length;
-  const low=D.inv.filter(m=>m.g!=null&&m.g<200).length;
+  const open=D.projects.filter(p=>statusOpen(p.status)).length;
+  const active=D.projects.filter(p=>p.status==='active').length;
+  const auto=getAutoNeeds().filter(x=>x.buy>0).length;
+  const low=lowInventory().length;
   document.getElementById('updated').textContent=D.updated?'Updated '+new Date(D.updated).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'Not yet updated';
-  document.getElementById('stats').innerHTML=stt(active,'Active')+stt(D.completed.length,'Done')+stt(Math.round(D.materialUsed)+'g','Used')+stt(D.lessons.length,'Lessons')+stt(low,'Low spools');
+  document.getElementById('stats').innerHTML=stt(active,'Active')+stt(open,'Open')+stt(auto,'To buy')+stt(low,'Low stock')+stt(D.knowledge.length,'Knowledge')+stt(Math.round(D.materialUsed)+'g','Used');
 }
 function stt(v,l){return `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`;}
-
-function renderInv(){
-  document.getElementById('inv-sub').textContent=D.inv.length+' spools';
-  document.getElementById('inv-list').innerHTML=D.inv.map((m,i)=>{
-    let mid;
-    if(m.g==null){mid=`<div class="ctl"><span class="grams confirm">confirm stock</span><span class="spend"><button class="chip edit" onclick="openInv(${i})">Edit</button></span></div>`;}
-    else{
-      const low=m.g<200,pct=Math.max(2,Math.min(100,m.g/1000*100));
-      mid=`<div class="bar"><i style="width:${pct}%;background:${m.c}"></i></div>
-      <div class="ctl"><span class="grams ${low?'low':''}">${Math.round(m.g)}g${low?' ⚠':''}</span>
-      <span class="spend"><button class="chip" onclick="spend(${i},10)">−10</button><button class="chip" onclick="spend(${i},25)">−25</button><button class="chip" onclick="spend(${i},50)">−50</button><button class="chip edit" onclick="openInv(${i})">✎</button></span></div>`;
-    }
-    return `<div class="card inv"><div class="top tap" onclick="openInv(${i})"><span class="swatch" style="background:${m.c}"></span><span class="name">${esc(m.name)}</span><span class="type">${m.type}</span></div>${mid}</div>`;
-  }).join('');
+function lowInventory(){
+  const a=[];D.inv.filament.forEach(m=>{if(m.g!=null&&m.g<200)a.push({kind:'Filament',name:m.name,detail:Math.round(m.g)+'g left'});});
+  D.inv.hardware.forEach(h=>{if((Number(h.min)||0)>0&&(Number(h.qty)||0)<Number(h.min))a.push({kind:'Hardware',name:h.name,detail:`${fmtQty(h.qty,h.unit)} on hand / min ${fmtQty(h.min,h.unit)}`});});
+  return a;
 }
-function spend(i,g){const m=D.inv[i];if(m.g==null)return;m.g=Math.max(0,m.g-g);D.materialUsed+=g;save();renderInv();}
 
-function renderBuilds(){
-  const a=D.builds.filter(b=>b.status==='active').length,q=D.builds.filter(b=>b.status==='queue').length;
-  document.getElementById('builds-sub').textContent=`${a} active · ${q} queued`;
-  let html=D.builds.map(b=>buildCard(b,false)).join('');
-  html+=D.completed.map(c=>buildCard({name:c.name,status:'done',notes:c.result,date:c.date},true)).join('');
-  document.getElementById('builds-list').innerHTML=html;
-}
-function buildCard(b,done){
-  const mats=(b.colors&&b.colors.length)?`<div class="b-mats">${b.colors.map(c=>`<span class="pill"><span class="swatch" style="background:${c[0]}"></span>${esc(c[1])}</span>`).join('')}</div>`:'';
-  const meta=[b.notes?esc(b.notes):'',b.est?'Est. '+esc(b.est):'',(b.used>0)?'Used '+Math.round(b.used)+'g':'',b.date?esc(b.date):''].filter(Boolean).join(' · ');
-  const block=(b.status==='queue'&&b.blocking)?`<div class="b-block">⏳ ${esc(b.blocking)}</div>`:'';
-  const iters=(b.iter&&b.iter.length)?b.iter.map(it=>`<div class="iter">${esc(it.date)} — ${esc(it.note)}</div>`).join(''):'';
-  const phase=b.phase?`<span class="pill">P${b.phase}</span>`:'';
-  let actions='';
-  if(!done){
-    const next=b.status==='queue'?['active','Start']:b.status==='active'?['done','Mark done']:['queue','Queue'];
-    actions=`<div class="b-actions">
-      <button class="act primary" onclick="cycle('${b.id}','${next[0]}')">${next[1]}</button>
-      <button class="act" onclick="addIter('${b.id}')">+ Iteration</button>
-      <button class="act" onclick="addUsed('${b.id}')">+ Grams</button>
-      <button class="act" onclick="openBuild2('${b.id}')">Edit</button>
+function renderDashboard(){
+  const active=D.projects.filter(p=>p.status==='active').sort((a,b)=>(a.priority||99)-(b.priority||99));
+  const open=D.projects.filter(p=>statusOpen(p.status));
+  const needs=getAutoNeeds().filter(n=>n.buy>0);
+  const low=lowInventory();
+  const recent=[...D.knowledge].slice(-3).reverse();
+  const next=active.find(p=>p.nextAction)||open.find(p=>p.nextAction)||open[0];
+  document.getElementById('dash-sub').textContent=`${active.length} active · ${needs.length} buy items`;
+  document.getElementById('dash-main').innerHTML=`
+    <div class="card">
+      <div class="kv">
+        <div class="mini-card"><div class="v">${active.length}</div><div class="l">Active</div></div>
+        <div class="mini-card"><div class="v">${needs.length}</div><div class="l">Procurement</div></div>
+        <div class="mini-card"><div class="v">${low.length}</div><div class="l">Low Stock</div></div>
+        <div class="mini-card"><div class="v">${D.projects.filter(p=>p.status==='done').length}</div><div class="l">Done</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="view-h" style="margin:0 0 8px">Next Best Action</div>
+      ${next?`<div class="dash-item tap" onclick="openProjectById('${next.id}')"><div class="t">${esc(next.name)}</div><div class="s">${esc(next.nextAction||next.blocking||'Open project and choose the next step')}</div></div>`:'<div class="empty">No open projects. Start a new one from Projects.</div>'}
+    </div>
+    <div class="card">
+      <div class="view-h" style="margin:0 0 8px">Active Projects</div>
+      ${active.length?active.map(p=>`<div class="dash-item tap" onclick="openProjectById('${p.id}')"><div class="t">${esc(p.name)} <span class="badge active">P${esc(p.phase||'-')}</span></div><div class="s">${esc(p.blocking?'Blocked: '+p.blocking:(p.nextAction||'No next action set'))}</div></div>`).join(''):'<div class="empty">Nothing active right now.</div>'}
+    </div>
+    <div class="card">
+      <div class="view-h" style="margin:0 0 8px">Highest Procurement Needs</div>
+      ${needs.length?needs.slice(0,5).map(n=>`<div class="dash-item"><div class="t">${esc(n.name)} <span class="muted">× ${fmtQty(n.buy,n.unit)}</span></div><div class="s">${esc(n.category)} · ${n.projects.map(p=>p.name).slice(0,2).join(', ')}</div></div>`).join(''):'<div class="empty">No project-generated shopping needs. Inventory covers current open projects.</div>'}
+    </div>
+    <div class="card">
+      <div class="view-h" style="margin:0 0 8px">Recent Knowledge</div>
+      ${recent.length?recent.map(k=>`<div class="dash-item tap" onclick="openKnowledgeById('${k.id}')"><div class="t">${esc(k.title)}</div><div class="s">${esc(k.category)} · ${esc(k.date)}</div></div>`).join(''):'<div class="empty">No knowledge logged yet.</div>'}
     </div>`;
+}
+
+function setInvMode(m){invMode=m;renderInv();}
+function renderInv(){
+  document.getElementById('inv-fil-btn').classList.toggle('on',invMode==='filament');document.getElementById('inv-hw-btn').classList.toggle('on',invMode==='hardware');
+  const el=document.getElementById('inv-list');
+  if(invMode==='filament'){
+    document.getElementById('inv-sub').textContent=D.inv.filament.length+' spools';
+    el.innerHTML=D.inv.filament.map((m,i)=>{
+      let mid;if(m.g==null){mid=`<div class="ctl"><span class="grams confirm">confirm stock</span><span class="spend"><button class="chip edit" onclick="openInv(${i})">Edit</button></span></div>`;}else{const low=m.g<200,pct=Math.max(2,Math.min(100,m.g/(m.spool||1000)*100));mid=`<div class="bar"><i style="width:${pct}%;background:${m.c}"></i></div><div class="ctl"><span class="grams ${low?'low':''}">${Math.round(m.g)}g${low?' ⚠':''}</span><span class="spend"><button class="chip" onclick="spendFil(${i},10)">−10</button><button class="chip" onclick="spendFil(${i},25)">−25</button><button class="chip" onclick="spendFil(${i},50)">−50</button><button class="chip edit" onclick="openInv(${i})">✎</button></span></div>`;}
+      const cost=m.cost?` · $${Number(m.cost).toFixed(2)} spool`:'';
+      return `<div class="card inv"><div class="top tap" onclick="openInv(${i})"><span class="swatch" style="background:${m.c}"></span><span class="name">${esc(m.name)}</span><span class="type">${esc(m.type)}</span></div>${mid}<div class="hw-meta">${m.spool?m.spool+'g spool':''}${cost}</div></div>`;
+    }).join('')+`<button class="add-build" onclick="openInv(-1)">+ Add spool</button>`;
+  }else{
+    document.getElementById('inv-sub').textContent=D.inv.hardware.length+' hardware bins';
+    el.innerHTML=D.inv.hardware.map((h,i)=>{const low=(Number(h.min)||0)>0&&(Number(h.qty)||0)<Number(h.min);const used=hardwareRequiredTotal(h);return `<div class="card"><div class="hw-row tap" onclick="openHardware(${i})"><div><div class="hw-name">${esc(h.name)}</div><div class="hw-meta">${esc(h.category||'Hardware')} · min ${fmtQty(h.min,h.unit)}${used?` · open projects need ${fmtQty(used,h.unit)}`:''}${h.notes?' · '+esc(h.notes):''}</div></div><div><div class="qty ${low?'low':''}">${fmtQty(h.qty,h.unit)}${low?' ⚠':''}</div></div></div><div class="b-actions"><button class="act" onclick="adjustHardware(${i},-1)">−1</button><button class="act" onclick="adjustHardware(${i},1)">+1</button><button class="act" onclick="openHardware(${i})">Edit</button></div></div>`;}).join('')+`<button class="add-build" onclick="openHardware(-1)">+ Add hardware</button>`;
   }
-  return `<div class="card"><div class="b-top ${done?'':'tap'}" ${done?'':`onclick="openBuild2('${b.id}')"`}><span class="b-name">${esc(b.name)}</span><span style="display:flex;gap:6px;align-items:center">${phase}<span class="badge ${b.status}">${b.status}</span></span></div><div class="b-meta">${meta}</div>${block}${mats}${iters}${actions}</div>`;
 }
-function openBuild2(id){const i=D.builds.findIndex(b=>b.id===id);if(i>=0)openBuild(i);}
-function cycle(id,to){
-  const b=D.builds.find(x=>x.id===id);if(!b)return;
-  if(to==='done'){D.completed.push({name:b.name,material:'mixed',date:mon(),result:b.notes||'Completed'});D.builds=D.builds.filter(x=>x.id!==id);toast('Moved to completed');}
-  else if(to==='active'){b.status='active';if(!b.started)b.started=mon();}
-  else b.status=to;
-  save();renderBuilds();
-}
-function addIter(id){const b=D.builds.find(x=>x.id===id);if(!b)return;const n=prompt('Iteration note (what changed / fit issue):','');if(!n)return;b.iter=b.iter||[];b.iter.push({date:day(),note:n});save();renderBuilds();}
-function addUsed(id){const b=D.builds.find(x=>x.id===id);if(!b)return;const v=prompt('Grams used on this build this session:','');const n=parseFloat(v);if(isNaN(n))return;b.used=(b.used||0)+n;D.materialUsed+=n;save();renderBuilds();}
+function spendFil(i,g){const m=D.inv.filament[i];if(!m||m.g==null)return;m.g=Math.max(0,m.g-g);D.materialUsed+=g;save();renderAll();}
+function adjustHardware(i,d){const h=D.inv.hardware[i];if(!h)return;h.qty=Math.max(0,(Number(h.qty)||0)+d);save();renderAll();}
+function hardwareRequiredTotal(h){const key=norm(h.name);return D.projects.filter(p=>statusOpen(p.status)).flatMap(p=>p.hardware||[]).filter(r=>(r.invId&&r.invId===h.id)||(!r.invId&&norm(r.name)===key)).reduce((s,r)=>s+(Number(r.qty)||0),0);}
 
-function renderLog(){
-  document.getElementById('lessons-list').innerHTML=[...D.lessons].reverse().map(l=>`<div class="lesson"><span class="d">${esc(l.date)}</span><span class="t">${esc(l.text)}</span></div>`).join('');
-  const fc=document.getElementById('fail-card');
-  fc.innerHTML=D.failed.length?D.failed.map(f=>`<div class="fail"><span class="n">${esc(f.name)}</span> · ${esc(f.date)}<br>${esc(f.failureMode)}${f.fix?' · Fix: '+esc(f.fix):''}</div>`).join(''):`<div style="font-size:12.5px;color:var(--dim)">No failures logged. Mark a project failed from its Edit screen.</div>`;
+function renderProjects(){
+  const filters=['open','active','queue','done','failed','all'];
+  document.getElementById('project-filters').innerHTML=filters.map(f=>`<button class="${projectFilter===f?'on':''}" onclick="projectFilter='${f}';renderProjects()">${f[0].toUpperCase()+f.slice(1)}</button>`).join('');
+  let arr=[...D.projects];
+  if(projectFilter==='open')arr=arr.filter(p=>statusOpen(p.status));else if(projectFilter!=='all')arr=arr.filter(p=>p.status===projectFilter);
+  arr.sort((a,b)=>statusRank(a.status)-statusRank(b.status)||(a.priority||99)-(b.priority||99));
+  const a=D.projects.filter(p=>p.status==='active').length,q=D.projects.filter(p=>p.status==='queue').length;
+  document.getElementById('projects-sub').textContent=`${a} active · ${q} queued`;
+  document.getElementById('projects-list').innerHTML=arr.length?arr.map(p=>projectCard(p)).join(''):'<div class="card empty">No projects in this filter.</div>';
 }
-function addLesson(){const el=document.getElementById('lesson-in');const v=el.value.trim();if(!v)return;D.lessons.push({date:mon(),text:v});el.value='';save();renderLog();toast('Lesson logged');}
-
-function renderShop(){
-  const got=D.shop.filter(s=>s.got).length;
-  document.getElementById('shop-sub').textContent=`${got}/${D.shop.length} got`;
-  document.getElementById('shop-list').innerHTML=D.shop.map((s,i)=>`<div class="shop" onclick="toggleShop(${i})"><span class="box ${s.got?'on':''}">${s.got?'✓':''}</span><span><span class="i ${s.got?'got':''}">${esc(s.i)}</span><div class="p">${esc(s.p)}</div></span></div>`).join('');
-  document.getElementById('ref-card').innerHTML=`<table>${D.rules.map(r=>`<tr><td>${esc(r[0])}</td><td style="color:var(--text)">${esc(r[1])}</td><td style="color:var(--dim)">${esc(r[2])}</td></tr>`).join('')}</table><details><summary>Colour schemes ▾</summary>${D.schemes.map(s=>`<div class="scheme"><span class="dots">${s[1].map(c=>`<span class="swatch" style="background:${c}"></span>`).join('')}</span><span class="nm">${s[0]}</span><span class="us">${s[2]}</span></div>`).join('')}</details>`;
+function statusRank(s){return {active:1,queue:2,failed:3,done:4}[s]||9;}
+function projectCard(b){
+  const scheme=byId(D.schemes,b.schemeId);const colors=(b.colors&&b.colors.length)?b.colors:(scheme?scheme.colors:[]);
+  const mats=colors.length?`<div class="b-mats">${colors.slice(0,8).map(c=>`<span class="pill"><span class="swatch" style="background:${c.hex}"></span>${esc(c.label||c.hex)}</span>`).join('')}</div>`:'';
+  const meta=[b.type?esc(b.type):'',b.est?`Est. ${Math.round(b.est)}g`:'',b.used>0?`Used ${Math.round(b.used)}g`:'' ,b.started?`Started ${esc(b.started)}`:''].filter(Boolean).join(' · ');
+  const block=(b.blocking&&statusOpen(b.status))?`<div class="b-block">⏳ ${esc(b.blocking)}</div>`:'';
+  const next=(b.nextAction&&statusOpen(b.status))?`<div class="b-next">→ ${esc(b.nextAction)}</div>`:'';
+  const req=reqSummary(b);const task=taskSummary(b);
+  const k=(b.knowledgeIds||[]).map(id=>byId(D.knowledge,id)).filter(Boolean).slice(0,3);
+  let actions='';if(b.status!=='done'){
+    const nextStatus=b.status==='queue'?['active','Start']:b.status==='active'?['done','Mark done']:['queue','Requeue'];
+    actions=`<div class="b-actions"><button class="act primary" onclick="cycleProject('${b.id}','${nextStatus[0]}')">${nextStatus[1]}</button><button class="act" onclick="addIteration('${b.id}')">+ Iteration</button><button class="act" onclick="addUsed('${b.id}')">+ Grams</button><button class="act" onclick="openProjectById('${b.id}')">Edit</button></div>`;
+  }else actions=`<div class="b-actions"><button class="act" onclick="openProjectById('${b.id}')">View/Edit</button><button class="act" onclick="cycleProject('${b.id}','queue')">Requeue</button></div>`;
+  const iters=(b.iterations&&b.iterations.length)?b.iterations.slice(-2).map(it=>`<div class="iter">${esc(it.date)}${it.rev?' · '+esc(it.rev):''} — ${esc(it.problem||it.result||'Iteration')}</div>`).join(''):'';
+  return `<div class="card"><div class="b-top tap" onclick="openProjectById('${b.id}')"><span class="b-name">${esc(b.name)}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="pill">P${esc(b.phase||'-')}</span><span class="badge ${b.status}">${esc(b.status)}</span></span></div><div class="b-meta">${meta}</div>${block}${next}${mats}<div class="reqgrid"><div class="reqbox ${req.matMissing?'miss':'ok'}"><b>Materials</b>${req.matTxt}</div><div class="reqbox ${req.hwMissing?'miss':'ok'}"><b>Hardware</b>${req.hwTxt}</div></div>${task.total?`<div class="progress"><i style="width:${task.pct}%"></i></div><div class="hw-meta">Tasks: ${task.done}/${task.total} done</div>`:''}${k.length?`<div class="b-mats">${k.map(x=>`<span class="pill blue">${esc(x.title)}</span>`).join('')}</div>`:''}${iters}${actions}</div>`;
 }
-function toggleShop(i){D.shop[i].got=!D.shop[i].got;save();renderShop();}
+function taskSummary(b){const t=b.tasks||[];const done=t.filter(x=>x.done).length;return{total:t.length,done,pct:t.length?Math.round(done/t.length*100):0};}
+function reqSummary(b){
+  let matMissing=0,hwMissing=0;const matTotal=(b.materials||[]).reduce((s,m)=>s+(Number(m.grams)||0),0);const hwTotal=(b.hardware||[]).reduce((s,h)=>s+(Number(h.qty)||0),0);
+  (b.materials||[]).forEach(m=>{if(materialHave(m)<(Number(m.grams)||0))matMissing++;});
+  (b.hardware||[]).forEach(h=>{if(hardwareHave(h)<(Number(h.qty)||0))hwMissing++;});
+  return{matMissing,hwMissing,matTxt:(b.materials||[]).length?`${Math.round(matTotal)}g planned${matMissing?` · ${matMissing} short`:' · stocked'}`:'No material reqs',hwTxt:(b.hardware||[]).length?`${fmtQty(hwTotal,'pcs')} planned${hwMissing?` · ${hwMissing} short`:' · stocked'}`:'No hardware reqs'};
+}
+function materialHave(m){const inv=m.invId?findFil(m.invId):D.inv.filament.find(x=>norm(x.name)===norm(m.name));return inv&&inv.g!=null?Number(inv.g)||0:0;}
+function hardwareHave(h){const inv=h.invId?findHw(h.invId):D.inv.hardware.find(x=>norm(x.name)===norm(h.name));return inv?Number(inv.qty)||0:0;}
+function openProjectById(id){const i=D.projects.findIndex(p=>p.id===id);if(i>=0)openProject(i);}
+function cycleProject(id,to){const b=byId(D.projects,id);if(!b)return;b.status=to;if(to==='active'&&!b.started)b.started=mon();if(to==='done')b.doneDate=mon();save();renderAll();toast(to==='done'?'Project completed':`Project set to ${to}`);}
+function addIteration(id){const b=byId(D.projects,id);if(!b)return;const problem=prompt('What changed / what failed / what did you learn?','');if(!problem)return;const fix=prompt('Fix or next revision idea (optional):','')||'';b.iterations=b.iterations||[];b.iterations.push({id:uid('it'),date:day(),rev:'',problem,fix,result:''});save();renderAll();toast('Iteration logged');}
+function addUsed(id){const b=byId(D.projects,id);if(!b)return;const v=prompt('Grams used on this project this session:','');const n=parseFloat(v);if(isNaN(n))return;b.used=(b.used||0)+n;D.materialUsed+=n;save();renderAll();}
 
-let editColors=[];
+function getAutoNeeds(){
+  const map={};
+  D.projects.filter(p=>statusOpen(p.status)).forEach(p=>{
+    (p.hardware||[]).forEach(r=>{const key='h|'+(r.invId||norm(r.name))+'|'+(r.unit||'pcs');if(!map[key])map[key]={key,category:'Hardware',name:r.name,unit:r.unit||'pcs',total:0,have:0,buy:0,projects:[],invId:r.invId};map[key].total+=Number(r.qty)||0;map[key].projects.push({id:p.id,name:p.name,qty:Number(r.qty)||0});});
+    (p.materials||[]).forEach(m=>{const key='m|'+(m.invId||norm(m.name));if(!map[key])map[key]={key,category:'Materials',name:m.name,type:m.type||'',color:m.color||'#888780',unit:'g',total:0,have:0,buy:0,projects:[],invId:m.invId};map[key].total+=Number(m.grams)||0;map[key].projects.push({id:p.id,name:p.name,qty:Number(m.grams)||0});});
+  });
+  Object.values(map).forEach(n=>{if(n.category==='Hardware'){const inv=n.invId?findHw(n.invId):D.inv.hardware.find(h=>norm(h.name)===norm(n.name));n.have=inv?Number(inv.qty)||0:0;}else{const inv=n.invId?findFil(n.invId):D.inv.filament.find(f=>norm(f.name)===norm(n.name));n.have=inv&&inv.g!=null?Number(inv.g)||0:0;}n.buy=Math.max(0,n.total-n.have);});
+  const arr=Object.values(map).filter(n=>n.total>0).sort((a,b)=>(b.buy>0)-(a.buy>0)||a.category.localeCompare(b.category)||a.name.localeCompare(b.name));
+  AUTO_CACHE={};arr.forEach(n=>AUTO_CACHE[n.key]=n);return arr;
+}
+function renderProc(){
+  const needs=getAutoNeeds();const buy=needs.filter(n=>n.buy>0);const got=D.procurement.manual.filter(x=>x.got).length;
+  document.getElementById('proc-sub').textContent=`${buy.length} auto needs · ${got}/${D.procurement.manual.length} manual got`;
+  const groups=['Materials','Hardware'];
+  document.getElementById('auto-proc').innerHTML=groups.map(g=>{const items=needs.filter(n=>n.category===g&&n.buy>0);return `<div class="view-h" style="margin-top:${g==='Materials'?'0':'18px'}">Auto ${g} <span class="sub">from open projects</span></div><div class="card">${items.length?items.map(n=>needCard(n)).join(''):`<div class="empty">No ${g.toLowerCase()} needed. Current inventory covers open project requirements.</div>`}</div>`;}).join('');
+  document.getElementById('manual-proc').innerHTML=D.procurement.manual.length?D.procurement.manual.map((s,i)=>{const p=s.projectId?byId(D.projects,s.projectId):null;return `<div class="shop"><span class="box ${s.got?'on':''}" onclick="toggleManualProc(${i})">${s.got?'✓':''}</span><span class="tap" onclick="openProcItem(${i})"><span class="i ${s.got?'got':''}">${esc(s.name)}</span><div class="p">${esc(s.category)} · ${fmtQty(s.qty,s.unit)}${s.source?' · '+esc(s.source):''}${p?' · '+esc(p.name):''}${s.notes?' · '+esc(s.notes):''}</div></span><span class="right"><button class="btn mini ghost" onclick="openProcItem(${i})">Edit</button></span></div>`;}).join(''):'<div class="empty">No manual shopping items. Auto needs above come directly from project requirements.</div>';
+}
+function needCard(n){return `<div class="need"><div class="need-top"><div><div class="need-name">${n.category==='Materials'?`<span class="swatch" style="background:${n.color}"></span> `:''}${esc(n.name)}</div><div class="need-meta">Need ${fmtQty(n.total,n.unit)} · Own ${fmtQty(n.have,n.unit)}</div></div><div class="need-buy">Buy ${fmtQty(n.buy,n.unit)}</div></div><div class="proj-list">${n.projects.map(p=>`${esc(p.name)}: ${fmtQty(p.qty,n.unit)}`).join('<br>')}</div><div class="b-actions"><button class="act" onclick="acquireNeed('${attr(n.key)}')">${n.category==='Materials'?'Add spool':'Add stock'}</button></div></div>`;}
+function acquireNeed(key){const n=AUTO_CACHE[key];if(!n)return;if(n.category==='Hardware'){let inv=n.invId?findHw(n.invId):D.inv.hardware.find(h=>norm(h.name)===norm(n.name));if(!inv){inv={id:uid('h'),name:n.name,category:'Hardware',qty:0,unit:n.unit,min:0,notes:'Added from procurement'};D.inv.hardware.push(inv);}const v=prompt(`How many ${n.name} did you buy/add?`,Math.ceil(n.buy));const q=parseFloat(v);if(isNaN(q))return;inv.qty=(Number(inv.qty)||0)+q;save();renderAll();toast('Hardware inventory updated');}else{openInv(-1,{name:n.name,type:n.type||'PLA',c:n.color||'#888780',g:1000,spool:1000,cost:null});}}
+
+function renderKnowledge(){
+  const cats=['all','Materials','Printer Settings','Tolerances','Hardware','Workflow','Lessons','Failures','Preferences'];
+  document.getElementById('knowledge-filters').innerHTML=cats.map(c=>`<button class="${knowledgeFilter===c?'on':''}" onclick="knowledgeFilter='${attr(c)}';renderKnowledge()">${esc(c)}</button>`).join('');
+  const q=norm(document.getElementById('knowledge-search')?.value||'');
+  let arr=[...D.knowledge];if(knowledgeFilter!=='all')arr=arr.filter(k=>k.category===knowledgeFilter);if(q)arr=arr.filter(k=>norm([k.title,k.body,k.material,k.tags,k.category,k.diameter].join(' ')).includes(q));
+  arr.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('knowledge-sub').textContent=`${arr.length}/${D.knowledge.length} shown`;
+  document.getElementById('knowledge-list').innerHTML=arr.length?arr.map(k=>knowledgeCard(k)).join(''):'<div class="card empty">No knowledge entries match this filter.</div>';
+  renderStandards();renderSchemes();
+}
+function knowledgeCard(k){return `<div class="card know-card"><div class="k-top"><div><div class="k-title">${esc(k.title)}</div><div class="k-meta"><span class="pill">${esc(k.category)}</span>${k.material?`<span class="pill blue">${esc(k.material)}</span>`:''}${k.diameter?`<span class="pill">Ø ${esc(k.diameter)}</span>`:''}</div></div><button class="btn mini ghost" onclick="openKnowledgeById('${k.id}')">Edit</button></div><div class="k-body">${esc(k.body)}</div>${k.tags?`<div class="k-meta">Tags: ${esc(k.tags)}</div>`:''}</div>`;}
+function openKnowledgeById(id){const i=D.knowledge.findIndex(k=>k.id===id);if(i>=0)openKnowledge(i);}
+function renderStandards(){document.getElementById('standards-card').innerHTML=D.standards.length?`<table>${D.standards.map((r,i)=>`<tr class="tap" onclick="openStandard(${i})"><td>${esc(r.topic)}</td><td>${esc(r.recommendation)}</td><td>${esc(r.notes)}</td></tr>`).join('')}</table>`:'<div class="empty">No reference rules yet.</div>';}
+function renderSchemes(){document.getElementById('scheme-card').innerHTML=D.schemes.length?D.schemes.map((s,i)=>`<div class="scheme tap" onclick="openScheme(${i})"><span class="dots">${(s.colors||[]).map(c=>`<span class="swatch" style="background:${c.hex}"></span>`).join('')}</span><span class="nm">${esc(s.name)}</span><span class="us">${esc(s.use)}</span></div>`).join(''):'<div class="empty">No colour schemes yet.</div>';}
+
 function openSheet(html){document.getElementById('sheet-body').innerHTML=html;document.getElementById('scrim').classList.add('on');document.getElementById('sheet').classList.add('on');}
 function closeSheet(){document.getElementById('scrim').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
 
-function openInv(i){
-  const m=i>=0?D.inv[i]:{name:'',type:'PLA',c:'#888780',g:1000};
-  openSheet(`<h3>${i>=0?'Edit spool':'Add spool'}</h3>
-    <div class="lbl">Name</div><input class="field" id="f-name" value="${esc(m.name)}" placeholder="e.g. PLA Matte Teal">
-    <div class="row2"><div style="flex:1"><div class="lbl">Type</div>
-      <select class="field" id="f-type">${['PLA','PETG','PVA','TPU','ABS','ASA','Other'].map(t=>`<option ${t===m.type?'selected':''}>${t}</option>`).join('')}</select></div>
-      <div style="width:96px"><div class="lbl">Colour</div><input class="field" id="f-color" type="color" value="${m.c}" style="height:44px;padding:4px"></div></div>
-    <div class="lbl">Grams remaining <span style="text-transform:none;color:var(--dim)">(blank = confirm later)</span></div>
-    <input class="field mono" id="f-grams" inputmode="decimal" value="${m.g==null?'':m.g}" placeholder="e.g. 1000">
-    <div class="sheet-actions">
-      <button class="btn full" onclick="saveInv(${i})">Save</button>
-      <button class="btn ghost" onclick="closeSheet()">Cancel</button>
-      ${i>=0?`<button class="btn danger" onclick="delInv(${i})">Delete</button>`:''}
-    </div>`);
-}
-function saveInv(i){
-  const name=document.getElementById('f-name').value.trim();if(!name){toast('Name required');return;}
-  const gv=document.getElementById('f-grams').value.trim();const g=gv===''?null:Math.max(0,parseFloat(gv)||0);
-  const obj={name,type:document.getElementById('f-type').value,c:document.getElementById('f-color').value,g};
-  if(i>=0)D.inv[i]=obj;else D.inv.push(obj);
-  save();renderInv();closeSheet();toast(i>=0?'Spool updated':'Spool added');
-}
-function delInv(i){if(!confirm('Delete '+D.inv[i].name+'?'))return;D.inv.splice(i,1);save();renderInv();closeSheet();}
+function openInv(i,prefill){const m=i>=0?D.inv.filament[i]:(prefill||{name:'',type:'PLA',c:'#888780',g:1000,spool:1000,cost:null});openSheet(`<h3>${i>=0?'Edit spool':'Add spool'}</h3><div class="lbl">Name</div><input class="field" id="f-name" value="${attr(m.name)}" placeholder="e.g. PLA Matte Teal"><div class="row2"><div style="flex:1"><div class="lbl">Type</div><select class="field" id="f-type">${['PLA','PETG','PVA','TPU','ABS','ASA','Other'].map(t=>`<option ${t===m.type?'selected':''}>${t}</option>`).join('')}</select></div><div style="width:96px"><div class="lbl">Colour</div><input class="field" id="f-color" type="color" value="${attr(m.c||'#888780')}" style="height:44px;padding:4px"></div></div><div class="row2"><div><div class="lbl">Grams remaining</div><input class="field mono" id="f-grams" inputmode="decimal" value="${m.g==null?'':attr(m.g)}" placeholder="blank = confirm later"></div><div><div class="lbl">Spool size g</div><input class="field mono" id="f-spool" inputmode="decimal" value="${attr(m.spool||1000)}"></div></div><div class="lbl">Spool cost $ <span style="text-transform:none;color:var(--dim)">(optional)</span></div><input class="field mono" id="f-cost" inputmode="decimal" value="${m.cost==null?'':attr(m.cost)}" placeholder="e.g. 24.99"><div class="sheet-actions"><button class="btn full" onclick="saveInv(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delInv(${i})">Delete</button>`:''}</div>`);}
+function saveInv(i){const name=document.getElementById('f-name').value.trim();if(!name){toast('Name required');return;}const gv=document.getElementById('f-grams').value.trim();const cv=document.getElementById('f-cost').value.trim();const obj={id:i>=0?D.inv.filament[i].id:uid('f'),name,type:document.getElementById('f-type').value,c:document.getElementById('f-color').value,g:gv===''?null:Math.max(0,parseFloat(gv)||0),spool:parseFloat(document.getElementById('f-spool').value)||1000,cost:cv===''?null:Math.max(0,parseFloat(cv)||0)};if(i>=0)D.inv.filament[i]=obj;else D.inv.filament.push(obj);save();renderAll();closeSheet();toast(i>=0?'Spool updated':'Spool added');}
+function delInv(i){if(!confirm('Delete '+D.inv.filament[i].name+'?'))return;D.inv.filament.splice(i,1);save();renderAll();closeSheet();}
 
-function openBuild(i){
-  const b=i>=0?D.builds[i]:{name:'',status:'queue',phase:1,notes:'',blocking:'',est:'',used:0,colors:[],iter:[]};
-  editColors=JSON.parse(JSON.stringify(b.colors||[]));
-  openSheet(`<h3>${i>=0?'Edit project':'New project'}</h3>
-    <div class="lbl">Name</div><input class="field" id="f-name" value="${esc(b.name)}" placeholder="e.g. Articulating landing gear">
-    <div class="row2"><div style="flex:1"><div class="lbl">Status</div>
-      <select class="field" id="f-status">${['queue','active','done','failed'].map(s=>`<option ${s===b.status?'selected':''}>${s}</option>`).join('')}</select></div>
-      <div style="width:84px"><div class="lbl">Phase</div><input class="field mono" id="f-phase" inputmode="numeric" value="${b.phase||''}"></div></div>
-    <div class="lbl">Notes / parameters</div><textarea class="field" id="f-notes" placeholder="Dimensions, module, clearance, design notes…">${esc(b.notes)}</textarea>
-    <div class="row2"><div style="flex:1"><div class="lbl">Est. material</div><input class="field" id="f-est" value="${esc(b.est)}" placeholder="~200g mixed"></div>
-      <div style="flex:1"><div class="lbl">Blocking</div><input class="field" id="f-block" value="${esc(b.blocking)}" placeholder="What's it waiting on"></div></div>
-    <div class="lbl">Part colours</div><div class="color-edit" id="color-edit"></div>
-    <button class="btn ghost sm" style="margin-top:8px" onclick="addColor()">+ Add part colour</button>
-    <div class="sheet-actions">
-      <button class="btn full" onclick="saveBuild(${i})">Save</button>
-      <button class="btn ghost" onclick="closeSheet()">Cancel</button>
-      ${i>=0?`<button class="btn danger" onclick="delBuild(${i})">Delete</button>`:''}
-    </div>`);
-  renderColorEdit();
+function openHardware(i){const h=i>=0?D.inv.hardware[i]:{name:'',category:'Fasteners',qty:0,unit:'pcs',min:0,notes:''};openSheet(`<h3>${i>=0?'Edit hardware':'Add hardware'}</h3><div class="lbl">Name</div><input class="field" id="h-name" value="${attr(h.name)}" placeholder="e.g. M3 x 10 socket screws"><div class="row2"><div><div class="lbl">Category</div><select class="field" id="h-cat">${['Fasteners','Bearings','Motion','Electronics','Tools','Consumables','Other'].map(c=>`<option ${c===h.category?'selected':''}>${c}</option>`).join('')}</select></div><div><div class="lbl">Unit</div><input class="field" id="h-unit" value="${attr(h.unit||'pcs')}"></div></div><div class="row2"><div><div class="lbl">Qty on hand</div><input class="field mono" id="h-qty" inputmode="decimal" value="${attr(h.qty||0)}"></div><div><div class="lbl">Min stock</div><input class="field mono" id="h-min" inputmode="decimal" value="${attr(h.min||0)}"></div></div><div class="lbl">Notes</div><textarea class="field" id="h-notes">${esc(h.notes)}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveHardware(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delHardware(${i})">Delete</button>`:''}</div>`);}
+function saveHardware(i){const name=document.getElementById('h-name').value.trim();if(!name){toast('Name required');return;}const obj={id:i>=0?D.inv.hardware[i].id:uid('h'),name,category:document.getElementById('h-cat').value,qty:Math.max(0,parseFloat(document.getElementById('h-qty').value)||0),unit:document.getElementById('h-unit').value.trim()||'pcs',min:Math.max(0,parseFloat(document.getElementById('h-min').value)||0),notes:document.getElementById('h-notes').value.trim()};if(i>=0)D.inv.hardware[i]=obj;else D.inv.hardware.push(obj);save();renderAll();closeSheet();toast('Hardware saved');}
+function delHardware(i){if(!confirm('Delete '+D.inv.hardware[i].name+'?'))return;D.inv.hardware.splice(i,1);save();renderAll();closeSheet();}
+
+function projectTemplate(type){
+  const T={materials:[],hardware:[],tasks:[],schemeId:''};
+  if(type==='Mechanical'||type==='General'){T.schemeId='s001';T.materials=[matFromInvName('PLA Mandarin Orange',80),matFromInvName('PETG Black',100)].filter(Boolean);T.hardware=[hwFromInvName('M3 screws + nuts',20),hwFromInvName('M3 heat-set brass inserts',10),hwFromInvName('Compression springs',2),hwFromInvName('608 bearings',2)].filter(Boolean);T.tasks=['CAD envelope','Print tolerance coupon','Prototype moving joint','Revise fit','Final assembly'].map(text=>({id:uid('t'),text,done:false}));}
+  if(type==='Tool'){T.schemeId='s002';T.materials=[matFromInvName('PETG Black',180)].filter(Boolean);T.hardware=[hwFromInvName('M6/M8 threaded rod + nuts',1),hwFromInvName('M3 heat-set brass inserts',8),hwFromInvName('M3 screws + nuts',20)].filter(Boolean);T.tasks=['Measure purchased hardware','CAD around real hardware','Print jaw/body prototype','Test load and flex'].map(text=>({id:uid('t'),text,done:false}));}
+  if(type==='Aircraft'){T.schemeId='s006';T.materials=[matFromInvName('PLA Ash Gray',120),matFromInvName('PETG Navy Blue',100)].filter(Boolean);T.hardware=[hwFromInvName('M3 screws + nuts',30),hwFromInvName('608 bearings',4),hwFromInvName('Compression springs',2)].filter(Boolean);T.tasks=['Reference real mechanism','Sketch degrees of freedom','Print hinge coupon','Prototype subassembly','Document engineering notes'].map(text=>({id:uid('t'),text,done:false}));}
+  if(type==='Display'){T.schemeId='s005';T.materials=[matFromInvName('PLA Matte White',120),matFromInvName('PLA Mandarin Orange',40)].filter(Boolean);T.hardware=[];T.tasks=['Define final dimensions','Choose colour scheme','Print surface-quality test','Final print'].map(text=>({id:uid('t'),text,done:false}));}
+  if(type==='RC'){T.schemeId='s003';T.materials=[matFromInvName('PETG Black',150),matFromInvName('PETG Navy Blue',100)].filter(Boolean);T.hardware=[hwFromInvName('M3 screws + nuts',30),hwFromInvName('608 bearings',4)].filter(Boolean);T.tasks=['List electronics/mechanics','Print fit coupon','Prototype mount','Test vibration/clearance'].map(text=>({id:uid('t'),text,done:false}));}
+  return T;
 }
-function renderColorEdit(){
-  document.getElementById('color-edit').innerHTML=editColors.length?editColors.map((c,j)=>`<span class="ce-pill"><span class="swatch" style="background:${c[0]}"></span>${esc(c[1])}<span class="ce-x tap" onclick="rmColor(${j})">×</span></span>`).join(''):`<span style="font-size:12px;color:var(--dim)">None yet</span>`;
+function matFromInvName(name,grams){const f=D.inv.filament.find(x=>norm(x.name)===norm(name))||D.inv.filament.find(x=>norm(x.name).includes(norm(name.split(' ')[0])));return f?{id:uid('m'),invId:f.id,name:f.name,type:f.type,color:f.c,grams}:null;}
+function hwFromInvName(name,qty){const h=D.inv.hardware.find(x=>norm(x.name)===norm(name))||D.inv.hardware.find(x=>norm(x.name).includes(norm(name.split(' ')[0])));return h?{id:uid('r'),invId:h.id,name:h.name,qty,unit:h.unit||'pcs'}:null;}
+function mergeReq(existing,incoming,kind){incoming.forEach(x=>{const exists=existing.some(e=>(x.invId&&e.invId===x.invId)||norm(e.name)===norm(x.name));if(!exists)existing.push(x);});}
+function openProject(i){
+  const b=i>=0?D.projects[i]:{name:'',type:'Mechanical',status:'queue',priority:D.projects.length+1,phase:1,started:null,nextAction:'',blocking:'',notes:'',est:0,used:0,schemeId:'',colors:[],materials:[],hardware:[],tasks:[],knowledgeIds:[],iterations:[]};
+  editMaterials=JSON.parse(JSON.stringify(b.materials||[]));editHardware=JSON.parse(JSON.stringify(b.hardware||[]));editTasks=JSON.parse(JSON.stringify(b.tasks||[]));editColors=JSON.parse(JSON.stringify(b.colors||[]));editKnowledgeIds=JSON.parse(JSON.stringify(b.knowledgeIds||[]));
+  openSheet(`<h3>${i>=0?'Edit project':'New project'}</h3><div class="lbl">Name</div><input class="field" id="p-name" value="${attr(b.name)}" placeholder="e.g. Articulating landing gear"><div class="row3"><div><div class="lbl">Type</div><select class="field" id="p-type">${['Mechanical','Tool','Aircraft','Display','RC','General'].map(t=>`<option ${t===b.type?'selected':''}>${t}</option>`).join('')}</select></div><div><div class="lbl">Status</div><select class="field" id="p-status">${['queue','active','done','failed'].map(s=>`<option ${s===b.status?'selected':''}>${s}</option>`).join('')}</select></div><div><div class="lbl">Priority</div><input class="field mono" id="p-priority" inputmode="numeric" value="${attr(b.priority||'')}"></div></div><div class="row2"><div><div class="lbl">Phase</div><input class="field mono" id="p-phase" inputmode="numeric" value="${attr(b.phase||'')}"></div><div><div class="lbl">Est. grams</div><input class="field mono" id="p-est" inputmode="decimal" value="${attr(b.est||'')}"></div></div><div class="lbl">Next action</div><input class="field" id="p-next" value="${attr(b.nextAction||'')}" placeholder="One useful next move"><div class="lbl">Blocking / waiting on</div><input class="field" id="p-block" value="${attr(b.blocking||'')}" placeholder="Hardware, CAD, print test, etc."><div class="lbl">Notes / parameters</div><textarea class="field" id="p-notes" placeholder="Dimensions, module, clearance, design notes…">${esc(b.notes)}</textarea><div class="sheet-actions" style="margin-top:12px"><button class="btn ghost sm" onclick="applyTemplateFromForm()">Auto-fill from type</button></div><div class="lbl">Materials needed</div><div class="edit-list" id="edit-materials"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectMaterial()">+ Add material</button><div class="lbl">Hardware needed</div><div class="edit-list" id="edit-hardware"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectHardware()">+ Add hardware</button><div class="lbl">Checklist</div><div class="edit-list" id="edit-tasks"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectTask()">+ Add task</button><div class="lbl">Colour scheme</div><div class="row2"><select class="field" id="p-scheme"><option value="">No scheme</option>${D.schemes.map(s=>`<option value="${attr(s.id)}" ${s.id===b.schemeId?'selected':''}>${esc(s.name)}</option>`).join('')}</select><button class="btn ghost sm" onclick="applySchemeToProject()">Apply</button></div><div class="edit-list" id="edit-colors"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectColor()">+ Add part colour</button><div class="lbl">Knowledge linked</div><div class="edit-list" id="edit-knowledge"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addKnowledgeRef()">+ Link knowledge</button><div class="sheet-actions"><button class="btn full" onclick="saveProject(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delProject(${i})">Delete</button>`:''}</div>`);
+  renderProjectEditLists();
 }
-function addColor(){const label=prompt('Part + colour label (e.g. "PLA Orange drive gear"):','');if(!label)return;const hex=prompt('Hex colour (e.g. #E0652F):','#888780')||'#888780';editColors.push([hex,label]);renderColorEdit();}
-function rmColor(j){editColors.splice(j,1);renderColorEdit();}
-function saveBuild(i){
-  const name=document.getElementById('f-name').value.trim();if(!name){toast('Name required');return;}
-  const status=document.getElementById('f-status').value;
-  const obj={
-    id:i>=0?D.builds[i].id:'b'+Date.now().toString(36),
-    name,status,
-    phase:parseInt(document.getElementById('f-phase').value)||null,
-    notes:document.getElementById('f-notes').value.trim(),
-    est:document.getElementById('f-est').value.trim(),
-    blocking:document.getElementById('f-block').value.trim(),
-    used:i>=0?(D.builds[i].used||0):0,
-    started:i>=0?D.builds[i].started:(status==='active'?mon():null),
-    colors:editColors,iter:i>=0?(D.builds[i].iter||[]):[]
-  };
-  if(status==='done'){D.completed.push({name,material:'mixed',date:mon(),result:obj.notes||'Completed'});if(i>=0)D.builds.splice(i,1);}
-  else if(i>=0)D.builds[i]=obj;else D.builds.push(obj);
-  save();renderBuilds();closeSheet();toast(i>=0?'Project updated':'Project added');
+function renderProjectEditLists(){
+  const matEl=document.getElementById('edit-materials');if(matEl)matEl.innerHTML=editMaterials.length?editMaterials.map((m,j)=>`<div class="edit-item"><div class="main"><span class="swatch" style="background:${m.color||'#888780'}"></span> ${esc(m.name)}<div class="sub">${esc(m.type||'')} · ${Math.round(m.grams||0)}g · have ${Math.round(materialHave(m))}g</div></div><span class="x tap" onclick="editMaterials.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No material requirements yet.</div>';
+  const hwEl=document.getElementById('edit-hardware');if(hwEl)hwEl.innerHTML=editHardware.length?editHardware.map((h,j)=>`<div class="edit-item"><div class="main">${esc(h.name)}<div class="sub">Need ${fmtQty(h.qty,h.unit)} · have ${fmtQty(hardwareHave(h),h.unit)}</div></div><span class="x tap" onclick="editHardware.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No hardware requirements yet.</div>';
+  const taskEl=document.getElementById('edit-tasks');if(taskEl)taskEl.innerHTML=editTasks.length?editTasks.map((t,j)=>`<div class="edit-item"><label class="checkline"><input type="checkbox" ${t.done?'checked':''} onchange="editTasks[${j}].done=this.checked"><span>${esc(t.text)}</span></label><span class="x tap" onclick="editTasks.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No tasks yet.</div>';
+  const colEl=document.getElementById('edit-colors');if(colEl)colEl.innerHTML=editColors.length?editColors.map((c,j)=>`<div class="edit-item"><div class="main"><span class="swatch" style="background:${c.hex}"></span> ${esc(c.label||c.hex)}</div><span class="x tap" onclick="editColors.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No custom colours. Scheme colours can still display.</div>';
+  const kEl=document.getElementById('edit-knowledge');if(kEl)kEl.innerHTML=editKnowledgeIds.length?editKnowledgeIds.map((id,j)=>{const k=byId(D.knowledge,id);return `<div class="edit-item"><div class="main">${k?esc(k.title):'Missing knowledge'}<div class="sub">${k?esc(k.category):''}</div></div><span class="x tap" onclick="editKnowledgeIds.splice(${j},1);renderProjectEditLists()">×</span></div>`;}).join(''):'<div class="empty">No knowledge linked yet.</div>';
 }
-function delBuild(i){if(!confirm('Delete '+D.builds[i].name+'?'))return;D.builds.splice(i,1);save();renderBuilds();closeSheet();}
+function applyTemplateFromForm(){const type=document.getElementById('p-type').value;const t=projectTemplate(type);mergeReq(editMaterials,t.materials,'mat');mergeReq(editHardware,t.hardware,'hw');mergeReq(editTasks,t.tasks,'task');if(t.schemeId){document.getElementById('p-scheme').value=t.schemeId;if(!editColors.length){const s=byId(D.schemes,t.schemeId);if(s)editColors=JSON.parse(JSON.stringify(s.colors||[]));}}renderProjectEditLists();toast('Template applied');}
+function addProjectMaterial(){const list=D.inv.filament.map((m,i)=>`${i+1}. ${m.name} (${m.g==null?'confirm':Math.round(m.g)+'g'})`).join('\n');const choice=prompt('Type an inventory number or custom material name:\n'+list,'');if(!choice)return;let f=null;if(/^\d+$/.test(choice.trim()))f=D.inv.filament[parseInt(choice,10)-1];const grams=parseFloat(prompt('Estimated grams needed:',f?'100':'100'));if(isNaN(grams))return;editMaterials.push(f?{id:uid('m'),invId:f.id,name:f.name,type:f.type,color:f.c,grams}:{id:uid('m'),invId:'',name:choice.trim(),type:prompt('Material type:','PLA')||'',color:prompt('Hex colour:','#888780')||'#888780',grams});renderProjectEditLists();}
+function addProjectHardware(){const list=D.inv.hardware.map((h,i)=>`${i+1}. ${h.name} (${fmtQty(h.qty,h.unit)} on hand)`).join('\n');const choice=prompt('Type a hardware inventory number or custom item:\n'+list,'');if(!choice)return;let h=null;if(/^\d+$/.test(choice.trim()))h=D.inv.hardware[parseInt(choice,10)-1];const qty=parseFloat(prompt('Quantity needed:',h?'1':'1'));if(isNaN(qty))return;editHardware.push(h?{id:uid('r'),invId:h.id,name:h.name,qty,unit:h.unit||'pcs'}:{id:uid('r'),invId:'',name:choice.trim(),qty,unit:prompt('Unit:','pcs')||'pcs'});renderProjectEditLists();}
+function addProjectTask(){const text=prompt('Task / milestone:','');if(!text)return;editTasks.push({id:uid('t'),text,done:false});renderProjectEditLists();}
+function addProjectColor(){const label=prompt('Part + colour label (e.g. PLA Orange drive gear):','');if(!label)return;const hex=prompt('Hex colour:', '#E0652F')||'#E0652F';editColors.push({hex,label});renderProjectEditLists();}
+function applySchemeToProject(){const id=document.getElementById('p-scheme').value;const s=byId(D.schemes,id);if(!s)return;editColors=JSON.parse(JSON.stringify(s.colors||[]));renderProjectEditLists();toast('Scheme applied');}
+function addKnowledgeRef(){const list=D.knowledge.slice(-15).reverse().map((k,i)=>`${i+1}. [${k.category}] ${k.title}`).join('\n');const choice=prompt('Choose recent knowledge number to link:\n'+list,'');if(!choice)return;const arr=D.knowledge.slice(-15).reverse();const k=arr[parseInt(choice,10)-1];if(k&&!editKnowledgeIds.includes(k.id)){editKnowledgeIds.push(k.id);renderProjectEditLists();}}
+function saveProject(i){const name=document.getElementById('p-name').value.trim();if(!name){toast('Name required');return;}const status=document.getElementById('p-status').value;const old=i>=0?D.projects[i]:null;const obj={id:old?old.id:uid('b'),name,type:document.getElementById('p-type').value,status,priority:parseInt(document.getElementById('p-priority').value)||99,phase:parseInt(document.getElementById('p-phase').value)||null,started:old?old.started:(status==='active'?mon():null),doneDate:status==='done'?(old&&old.doneDate?old.doneDate:mon()):(old?old.doneDate:null),nextAction:document.getElementById('p-next').value.trim(),blocking:document.getElementById('p-block').value.trim(),notes:document.getElementById('p-notes').value.trim(),est:parseFloat(document.getElementById('p-est').value)||0,used:old?(old.used||0):0,schemeId:document.getElementById('p-scheme').value,colors:editColors,materials:editMaterials,hardware:editHardware,tasks:editTasks,knowledgeIds:editKnowledgeIds,iterations:old?(old.iterations||[]):[]};if(status==='active'&&!obj.started)obj.started=mon();if(i>=0)D.projects[i]=obj;else D.projects.push(obj);save();renderAll();closeSheet();toast(i>=0?'Project updated':'Project added');}
+function delProject(i){if(!confirm('Delete '+D.projects[i].name+'?'))return;D.projects.splice(i,1);save();renderAll();closeSheet();}
+
+function openKnowledge(i){const k=i>=0?D.knowledge[i]:{category:'Materials',title:'',material:'',diameter:'',tags:'',body:'',date:mon()};openSheet(`<h3>${i>=0?'Edit knowledge':'Add knowledge'}</h3><div class="row2"><div><div class="lbl">Category</div><select class="field" id="k-cat">${['Materials','Printer Settings','Tolerances','Hardware','Workflow','Lessons','Failures','Preferences'].map(c=>`<option ${c===k.category?'selected':''}>${c}</option>`).join('')}</select></div><div><div class="lbl">Date</div><input class="field" id="k-date" value="${attr(k.date||mon())}"></div></div><div class="lbl">Title</div><input class="field" id="k-title" value="${attr(k.title)}" placeholder="e.g. PETG works better at 0.2mm for brackets"><div class="row2"><div><div class="lbl">Material</div><input class="field" id="k-material" value="${attr(k.material||'')}" placeholder="PLA / PETG / TPU"></div><div><div class="lbl">Diameter / setting</div><input class="field" id="k-dia" value="${attr(k.diameter||'')}" placeholder="0.2mm, M3, 245°C..."></div></div><div class="lbl">Tags</div><input class="field" id="k-tags" value="${attr(k.tags||'')}" placeholder="spring,detent,bearing"><div class="lbl">Lesson / preference / rule</div><textarea class="field" id="k-body">${esc(k.body)}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveKnowledge(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delKnowledge(${i})">Delete</button>`:''}</div>`);}
+function saveKnowledge(i){const title=document.getElementById('k-title').value.trim();const body=document.getElementById('k-body').value.trim();if(!title&&!body){toast('Add a title or body');return;}const obj={id:i>=0?D.knowledge[i].id:uid('k'),date:document.getElementById('k-date').value.trim()||mon(),category:document.getElementById('k-cat').value,title:title||body.slice(0,60),material:document.getElementById('k-material').value.trim(),diameter:document.getElementById('k-dia').value.trim(),tags:document.getElementById('k-tags').value.trim(),body};if(i>=0)D.knowledge[i]=obj;else D.knowledge.push(obj);save();renderAll();closeSheet();toast('Knowledge saved');}
+function delKnowledge(i){if(!confirm('Delete this knowledge entry?'))return;const id=D.knowledge[i].id;D.knowledge.splice(i,1);D.projects.forEach(p=>p.knowledgeIds=(p.knowledgeIds||[]).filter(x=>x!==id));save();renderAll();closeSheet();}
+function openStandard(i){const r=i>=0?D.standards[i]:{topic:'',recommendation:'',notes:''};openSheet(`<h3>${i>=0?'Edit reference':'Add reference'}</h3><div class="lbl">Topic</div><input class="field" id="st-topic" value="${attr(r.topic)}" placeholder="e.g. M3 insert hole"><div class="lbl">Recommendation</div><input class="field" id="st-rec" value="${attr(r.recommendation)}" placeholder="e.g. 4.6mm hole"><div class="lbl">Notes</div><textarea class="field" id="st-notes">${esc(r.notes)}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveStandard(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delStandard(${i})">Delete</button>`:''}</div>`);}
+function saveStandard(i){const obj={id:i>=0?D.standards[i].id:uid('st'),topic:document.getElementById('st-topic').value.trim(),recommendation:document.getElementById('st-rec').value.trim(),notes:document.getElementById('st-notes').value.trim()};if(!obj.topic){toast('Topic required');return;}if(i>=0)D.standards[i]=obj;else D.standards.push(obj);save();renderAll();closeSheet();}
+function delStandard(i){D.standards.splice(i,1);save();renderAll();closeSheet();}
+function openScheme(i){const s=i>=0?D.schemes[i]:{name:'',use:'',colors:[]};schemeColors=JSON.parse(JSON.stringify(s.colors||[]));openSheet(`<h3>${i>=0?'Edit colour scheme':'Add colour scheme'}</h3><div class="lbl">Name</div><input class="field" id="sc-name" value="${attr(s.name)}"><div class="lbl">Use case</div><input class="field" id="sc-use" value="${attr(s.use)}"><div class="lbl">Colours</div><div class="edit-list" id="scheme-colors"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addSchemeColor()">+ Add colour</button><div class="sheet-actions"><button class="btn full" onclick="saveScheme(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delScheme(${i})">Delete</button>`:''}</div>`);renderSchemeColors();}
+function renderSchemeColors(){const el=document.getElementById('scheme-colors');if(el)el.innerHTML=schemeColors.length?schemeColors.map((c,j)=>`<div class="edit-item"><div><span class="swatch" style="background:${c.hex}"></span> ${esc(c.label||c.hex)}</div><span class="x tap" onclick="schemeColors.splice(${j},1);renderSchemeColors()">×</span></div>`).join(''):'<div class="empty">No colours yet.</div>';}
+function addSchemeColor(){const label=prompt('Colour label:','Orange accent');if(!label)return;const hex=prompt('Hex colour:','#E0652F')||'#E0652F';schemeColors.push({hex,label});renderSchemeColors();}
+function saveScheme(i){const name=document.getElementById('sc-name').value.trim();if(!name){toast('Name required');return;}const obj={id:i>=0?D.schemes[i].id:uid('s'),name,use:document.getElementById('sc-use').value.trim(),colors:schemeColors};if(i>=0)D.schemes[i]=obj;else D.schemes.push(obj);save();renderAll();closeSheet();}
+function delScheme(i){const id=D.schemes[i].id;D.schemes.splice(i,1);D.projects.forEach(p=>{if(p.schemeId===id)p.schemeId='';});save();renderAll();closeSheet();}
+
+function openProcItem(i){const p=i>=0?D.procurement.manual[i]:{name:'',category:'Hardware',qty:1,unit:'pcs',source:'Sayal',projectId:'',got:false,notes:''};openSheet(`<h3>${i>=0?'Edit manual item':'Add manual item'}</h3><div class="lbl">Item</div><input class="field" id="pr-name" value="${attr(p.name)}" placeholder="e.g. M3 x 10 screws"><div class="row2"><div><div class="lbl">Category</div><select class="field" id="pr-cat">${['Materials','Hardware','Tools','Electronics','Consumables','Want'].map(c=>`<option ${c===p.category?'selected':''}>${c}</option>`).join('')}</select></div><div><div class="lbl">Source</div><input class="field" id="pr-source" value="${attr(p.source||'')}" placeholder="Sayal / Amazon"></div></div><div class="row2"><div><div class="lbl">Qty</div><input class="field mono" id="pr-qty" inputmode="decimal" value="${attr(p.qty||1)}"></div><div><div class="lbl">Unit</div><input class="field" id="pr-unit" value="${attr(p.unit||'pcs')}"></div></div><div class="lbl">Project</div><select class="field" id="pr-proj"><option value="">No specific project</option>${D.projects.filter(x=>statusOpen(x.status)).map(x=>`<option value="${attr(x.id)}" ${x.id===p.projectId?'selected':''}>${esc(x.name)}</option>`).join('')}</select><div class="lbl">Notes</div><textarea class="field" id="pr-notes">${esc(p.notes)}</textarea><label class="checkline" style="margin-top:12px"><input type="checkbox" id="pr-got" ${p.got?'checked':''}><span>Already got it</span></label><div class="sheet-actions"><button class="btn full" onclick="saveProcItem(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delProcItem(${i})">Delete</button>`:''}</div>`);}
+function saveProcItem(i){const name=document.getElementById('pr-name').value.trim();if(!name){toast('Name required');return;}const obj={id:i>=0?D.procurement.manual[i].id:uid('p'),name,category:document.getElementById('pr-cat').value,qty:parseFloat(document.getElementById('pr-qty').value)||1,unit:document.getElementById('pr-unit').value.trim()||'pcs',source:document.getElementById('pr-source').value.trim(),projectId:document.getElementById('pr-proj').value,got:document.getElementById('pr-got').checked,notes:document.getElementById('pr-notes').value.trim()};if(i>=0)D.procurement.manual[i]=obj;else D.procurement.manual.push(obj);save();renderAll();closeSheet();toast('Procurement item saved');}
+function toggleManualProc(i){D.procurement.manual[i].got=!D.procurement.manual[i].got;save();renderAll();}
+function delProcItem(i){D.procurement.manual.splice(i,1);save();renderAll();closeSheet();}
 
 function buildMarkdown(){
-  const inv=D.inv.map(m=>`| ${m.name} | ${m.type} | ${m.g==null?'confirm':Math.round(m.g)+'g'} |`).join('\n');
-  const builds=D.builds.map(b=>`| ${b.name} | ${b.status} | P${b.phase||'-'} | ${b.est||''} | ${b.blocking||'—'} | ${b.used>0?Math.round(b.used)+'g':''} |`).join('\n');
-  const done=D.completed.map(c=>`| ${c.name} | ${c.date} | ${c.material} | ${c.result} |`).join('\n');
-  const fail=D.failed.length?D.failed.map(f=>`| ${f.name} | ${f.date} | ${f.failureMode} | ${f.fix} |`).join('\n'):'| — | — | — | — |';
-  const less=D.lessons.map(l=>`| ${l.date} | ${l.text} |`).join('\n');
-  const shop=D.shop.map(s=>`| ${s.i} | ${s.p} | ${s.got?'Yes':'No'} |`).join('\n');
-  const iters=D.builds.flatMap(b=>(b.iter||[]).map(it=>`| ${b.name} | ${it.date} | ${it.note} |`));
-  return `## Material Inventory
-| Material | Type | Est. Stock |
-|---|---|---|
-${inv}
-
-## Builds & Queue
-| Build | Status | Phase | Est. | Blocking | Used |
-|---|---|---|---|---|---|
-${builds}
-
-## Completed Prints
-| Print | Date | Material | Result |
-|---|---|---|---|
-${done}
-
-## Failed Prints / Issues
-| Print | Date | Failure | Fix |
-|---|---|---|---|
-${fail}
-${iters.length?`\n## Build Iterations\n| Build | Date | Note |\n|---|---|---|\n${iters.join('\n')}\n`:''}
-## Key Lesson Log
-| Date | Lesson |
-|---|---|
-${less}
-
-## SAYAL Shopping List
-| Item | Purpose | Got It? |
-|---|---|---|
-${shop}
-
-Total material used to date: ${Math.round(D.materialUsed)}g`;
+  const auto=getAutoNeeds();
+  const filament=D.inv.filament.map(m=>`| ${m.name} | ${m.type} | ${m.g==null?'confirm':Math.round(m.g)+'g'} | ${m.cost?'$'+Number(m.cost).toFixed(2):''} |`).join('\n');
+  const hardware=D.inv.hardware.map(h=>`| ${h.name} | ${h.category} | ${fmtQty(h.qty,h.unit)} | ${fmtQty(h.min,h.unit)} | ${h.notes||''} |`).join('\n');
+  const projects=D.projects.map(p=>`| ${p.name} | ${p.status} | ${p.type} | P${p.phase||'-'} | ${p.priority||''} | ${p.nextAction||''} | ${p.blocking||''} | ${p.used?Math.round(p.used)+'g':''} |`).join('\n');
+  const reqs=D.projects.flatMap(p=>[...(p.materials||[]).map(m=>`| ${p.name} | Material | ${m.name} | ${fmtQty(m.grams,'g')} | have ${fmtQty(materialHave(m),'g')} |`),...(p.hardware||[]).map(h=>`| ${p.name} | Hardware | ${h.name} | ${fmtQty(h.qty,h.unit)} | have ${fmtQty(hardwareHave(h),h.unit)} |`)]).join('\n');
+  const buy=auto.filter(n=>n.buy>0).map(n=>`| ${n.category} | ${n.name} | ${fmtQty(n.buy,n.unit)} | ${n.projects.map(p=>p.name).join(', ')} |`).join('\n')||'| — | — | — | — |';
+  const manual=D.procurement.manual.map(s=>`| ${s.category} | ${s.name} | ${fmtQty(s.qty,s.unit)} | ${s.source||''} | ${s.got?'Yes':'No'} |`).join('\n')||'| — | — | — | — | — |';
+  const knowledge=D.knowledge.map(k=>`| ${k.date} | ${k.category} | ${k.title} | ${k.material||''} | ${(k.body||'').replace(/\n/g,' ')} |`).join('\n');
+  const standards=D.standards.map(r=>`| ${r.topic} | ${r.recommendation} | ${r.notes} |`).join('\n');
+  return `# Print Lab v3 Export — ${day()}\n\n## Filament Inventory\n| Material | Type | Stock | Cost |\n|---|---|---:|---:|\n${filament}\n\n## Hardware Inventory\n| Hardware | Category | Qty | Min | Notes |\n|---|---|---:|---:|---|\n${hardware}\n\n## Projects\n| Project | Status | Type | Phase | Priority | Next Action | Blocking | Used |\n|---|---|---|---|---:|---|---|---:|\n${projects}\n\n## Project Requirements\n| Project | Kind | Item | Required | Current Inventory |\n|---|---|---|---:|---:|\n${reqs||'| — | — | — | — | — |'}\n\n## Auto Procurement Needs\n| Category | Item | Buy | Projects |\n|---|---|---:|---|\n${buy}\n\n## Manual Procurement\n| Category | Item | Qty | Source | Got? |\n|---|---|---:|---|---|\n${manual}\n\n## Knowledge Base\n| Date | Category | Title | Material | Notes |\n|---|---|---|---|---|\n${knowledge}\n\n## Reference Standards\n| Topic | Recommendation | Notes |\n|---|---|---|\n${standards}\n\nTotal material used to date: ${Math.round(D.materialUsed)}g`;
 }
-function genMarkdown(){
-  document.getElementById('export-text').value=`<!-- Paste over the matching sections of print_tracker.md. From Print Lab app, ${day()}. -->\n\n`+buildMarkdown();
-  showExport();
-}
-function copyAIPrompt(){
-  const p=`You're my 3D print lab advisor. Below is my current tracker state (exported from my phone app on ${day()}). Compare it to the print_tracker.md in this project and write a short, direct progress update: what changed worth noting, which filament is running low, what's blocked and on what, and the single most useful next action. No filler. Then update the project doc to match.\n\n---\n${buildMarkdown()}`;
-  copyText(p,'AI prompt copied — paste into Claude');
-}
-function showExport(){const b=document.getElementById('export-box');b.style.display='block';b.scrollIntoView({behavior:'smooth'});}
-function copyExport(){copyText(document.getElementById('export-text').value,'Copied');}
-function copyText(txt,msg){
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(msg)).catch(()=>fallbackCopy(txt,msg));}
-  else fallbackCopy(txt,msg);
-}
-function fallbackCopy(txt,msg){const t=document.getElementById('export-text');t.value=txt;showExport();t.focus();t.select();t.setSelectionRange(0,99999);try{document.execCommand('copy');toast(msg);}catch(e){toast('Select & copy manually');}}
-function savePDF(){
-  const w=window.open('','_blank');const row=c=>`<tr>${c.map(x=>`<td>${x}</td>`).join('')}</tr>`;
-  const invR=D.inv.map(m=>row([m.name,m.type,m.g==null?'confirm':Math.round(m.g)+'g'])).join('');
-  const bR=D.builds.map(b=>row([b.name,b.status,'P'+(b.phase||'-'),b.est||'',b.blocking||'—'])).join('');
-  const dR=D.completed.map(c=>row([c.name,c.date,c.material,c.result])).join('');
-  const lR=D.lessons.map(l=>row([l.date,l.text])).join('');
-  if(!w){toast('Allow pop-ups to save PDF');return;}
-  w.document.write(`<html><head><title>Print Lab Report ${day()}</title><style>body{font-family:-apple-system,Arial,sans-serif;padding:32px;color:#1a1a1a;max-width:720px;margin:auto}h1{font-size:20px;margin-bottom:2px}.sub{color:#888;font-size:12px;margin-bottom:24px}h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin:22px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}table{width:100%;border-collapse:collapse;font-size:12px}td{padding:6px 8px;border-bottom:1px solid #eee;vertical-align:top}tr:first-child td{font-weight:600;color:#666}</style></head><body><h1>3D Print Lab — Bambu X2D</h1><div class="sub">Report ${day()} · ${Math.round(D.materialUsed)}g used to date</div><h2>Material Inventory</h2><table>${row(['Material','Type','Stock'])}${invR}</table><h2>Builds & Queue</h2><table>${row(['Build','Status','Phase','Est.','Blocking'])}${bR}</table><h2>Completed</h2><table>${row(['Print','Date','Material','Result'])}${dR}</table><h2>Lessons</h2><table>${row(['Date','Lesson'])}${lR}</table></body></html>`);
-  w.document.close();setTimeout(()=>w.print(),350);toast('Share sheet → Save as PDF');
-}
-function resetData(){if(!confirm('Reset all app data to the original handoff? Erases logged updates on this phone.'))return;D=freshData();save();renderAll();toast('Reset');}
-
-function renderAll(){renderStats();renderInv();renderBuilds();renderLog();renderShop();}
-load();renderAll();go('inv');
+function genMarkdown(){document.getElementById('export-text').value=buildMarkdown();showExport();}
+function copyAIPrompt(){const p=`You're my 3D printing project advisor. This is my current Print Lab v3 export from ${day()}. Give me a direct progress update: what moved, what is blocked, what I should buy, what stock is low, which knowledge/preferences matter for the next build, and the single best next action. Then suggest any project requirements I may be missing.\n\n---\n${buildMarkdown()}`;copyText(p,'AI prompt copied');}
+function exportJSON(){document.getElementById('export-text').value=JSON.stringify(D,null,2);showExport();toast('Backup generated');}
+function importJSON(){const txt=prompt('Paste a Print Lab JSON backup here:','');if(!txt)return;try{const obj=JSON.parse(txt);D=obj;normalizeData();save();renderAll();toast('Backup imported');}catch(e){toast('Invalid JSON');}}
+function showExport(){const b=document.getElementById('export-box');b.style.display='block';b.scrollIntoView({behavior:'smooth'});}function copyExport(){copyText(document.getElementById('export-text').value,'Copied');}
+function savePDF(){const w=window.open('','_blank');if(!w){toast('Allow pop-ups to save PDF');return;}const md=buildMarkdown().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));w.document.write(`<html><head><title>Print Lab Report ${day()}</title><style>body{font-family:-apple-system,Arial,sans-serif;padding:32px;color:#1a1a1a;max-width:820px;margin:auto;white-space:pre-wrap}h1{font-size:22px}</style></head><body>${md}</body></html>`);w.document.close();setTimeout(()=>w.print(),350);toast('Share sheet → Save as PDF');}
+function resetData(){if(!confirm('Reset all app data to v3 starter data? Export a JSON backup first if you want to keep your current data.'))return;D=freshData();save();renderAll();toast('Reset complete');}
+function renderAll(){renderStats();renderDashboard();renderInv();renderProjects();renderKnowledge();renderProc();}
+load();renderAll();go('dash');
 </script>
 </body>
 </html>
