@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Print Lab">
 <meta name="theme-color" content="#16161A">
-<title>Print Lab v5.1 — Project System</title>
+<title>Print Lab v5.2 HOTFIX — Project System</title>
 <style>
 :root{
   --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--surface3:#303039;--line:#34343C;
@@ -164,8 +164,8 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY='printlab_app_v51';
-const OLDKEYS=['printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2'];
+const KEY='printlab_app_v52';
+const OLDKEYS=['printlab_app_v51','printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2'];
 let D;
 let invMode='filament';
 let projectFilter='open';
@@ -276,7 +276,7 @@ function normalizeData(){
   D.inv=D.inv||{filament:[],hardware:[]};D.inv.filament=D.inv.filament||[];D.inv.hardware=D.inv.hardware||[];
   D.projects=D.projects||[];D.knowledge=D.knowledge||[];D.procurement=D.procurement||{manual:[]};D.procurement.manual=D.procurement.manual||[];
   D.standards=D.standards||[];D.schemes=D.schemes||[];D.inbox=D.inbox||[];if(D.lastBackup===undefined)D.lastBackup=null;
-  D.quickPrints=D.quickPrints||[];D.suggestions=D.suggestions||[];D.inv.filament.forEach(f=>{if(f.brand===undefined)f.brand='';if(f.transparent===undefined)f.transparent=/transparent|clear/i.test((f.name||'')+' '+(f.type||''));if(!f.tests)f.tests=[];if(!f.best)f.best={};});D.projects.forEach(p=>{p.attempts=p.attempts||[];});D.version=5;
+  D.quickPrints=D.quickPrints||[];D.suggestions=D.suggestions||[];D.inv.filament.forEach(f=>{if(f.brand===undefined)f.brand='';if(f.transparent===undefined)f.transparent=/transparent|clear/i.test((f.name||'')+' '+(f.type||''));if(!f.tests)f.tests=[];if(!f.best)f.best={};});D.projects.forEach(p=>{p.attempts=p.attempts||[];});D.version=5.2;
 }
 function save(silent){
   D.updated=new Date().toISOString();
@@ -757,6 +757,90 @@ function renderInv(){
     document.getElementById('inv-sub').textContent=D.inv.hardware.length+' hardware bins';
     el.innerHTML=D.inv.hardware.map((h,i)=>{const low=(Number(h.min)||0)>0&&(Number(h.qty)||0)<Number(h.min);const used=hardwareRequiredTotal(h);return `<div class="card"><div class="hw-row tap" onclick="openHardware(${i})"><div><div class="hw-name">${esc(h.name)}</div><div class="hw-meta">${esc(h.category||'Hardware')} · min ${fmtQty(h.min,h.unit)}${used?` · open projects need ${fmtQty(used,h.unit)}`:''}${h.notes?' · '+esc(h.notes):''}</div></div><div><div class="qty ${low?'low':''}">${fmtQty(h.qty,h.unit)}${low?' ⚠':''}</div></div></div><div class="b-actions"><button class="act" onclick="adjustHardware(${i},-1)">−1</button><button class="act" onclick="adjustHardware(${i},1)">+1</button><button class="act" onclick="openHardware(${i})">Edit</button></div></div>`;}).join('')+`<button class="add-build" onclick="openHardware(-1)">+ Add hardware</button>`;
   }
+}
+
+
+
+/* ---------- v5.2 HOTFIX: iPhone sheet scroll reset + Quick Print title/project controls ---------- */
+const APP_BUILD='v5.2 hotfix';
+function openSheet(html){
+  const sheet=document.getElementById('sheet');
+  const body=document.getElementById('sheet-body');
+  body.innerHTML=html;
+  sheet.scrollTop=0;
+  document.getElementById('scrim').classList.add('on');
+  sheet.classList.add('on');
+  requestAnimationFrame(()=>{sheet.scrollTop=0;});
+  setTimeout(()=>{sheet.scrollTop=0;},80);
+}
+function closeSheet(){
+  document.getElementById('scrim').classList.remove('on');
+  const sheet=document.getElementById('sheet');
+  sheet.classList.remove('on');
+  setTimeout(()=>{sheet.scrollTop=0;},120);
+}
+function renderStats(){
+  const open=D.projects.filter(p=>statusOpen(p.status)).length;
+  const active=D.projects.filter(p=>p.status==='active').length;
+  const auto=getAutoNeeds().filter(x=>x.buy>0).length;
+  const low=lowInventory().length;
+  document.getElementById('updated').textContent=D.updated?APP_BUILD+' · Updated '+new Date(D.updated).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):APP_BUILD+' · Not yet updated';
+  document.getElementById('stats').innerHTML=stt(active,'Active')+stt(open,'Open')+stt(auto,'To buy')+stt(low,'Low stock')+stt((D.inbox||[]).length,'Inbox')+stt(Math.round(D.materialUsed)+'g','Used');
+}
+function quickProjectName(id){const p=id?byId(D.projects,id):null;return p?p.name:'';}
+function openQuickProject(id){const q=byId(D.quickPrints,id);if(!q||!q.projectId){toast('No linked project');return;}openProjectById(q.projectId);}
+function detachQuickFromProject(id){
+  const q=byId(D.quickPrints,id);if(!q)return;
+  const pid=q.projectId;q.projectId='';
+  if(pid){const p=byId(D.projects,pid);if(p&&p.attempts)p.attempts=p.attempts.filter(a=>a.quickId!==id);}
+  save();renderAll();toast('Quick print detached');
+}
+function quickCard(q){
+  const f=q.filamentId?findFil(q.filamentId):null;
+  const p=q.projectId?byId(D.projects,q.projectId):null;
+  const title=q.name&&q.name.trim()?q.name:'Untitled quick print';
+  const actionHTML=p?
+    `<button class="act" onclick="openQuickPrintById('${q.id}')">Edit</button><button class="act" onclick="openQuickProject('${q.id}')">Open project</button><button class="act" onclick="detachQuickFromProject('${q.id}')">Detach</button>`:
+    `<button class="act" onclick="openQuickPrintById('${q.id}')">Edit</button><button class="act" onclick="attachQuickSheet('${q.id}')">Attach</button><button class="act primary" onclick="convertQuickToProject('${q.id}')">Save as project</button>`;
+  return `<div class="card qp-card"><div class="b-top"><div><div class="qp-title">${esc(title)}</div><div class="qp-meta">${esc(q.kind)} · ${esc(q.date||'')} · ${q.result?esc(q.result):'No result'}${p?' · '+esc(p.name):''}</div></div><span class="badge ${q.result==='Failed'?'failed':'done'}">${esc(q.result||'Saved')}</span></div><div class="b-mats">${f?`<span class="pill">${swatchHTML(f)}${esc(filamentName?filamentName(f,true):f.name)}</span>`:''}${q.orientation?`<span class="pill">${esc(q.orientation)}</span>`:''}${q.supportIssue?`<span class="pill ${q.supportIssue==='None'?'green':'red'}">${esc(q.supportIssue)}</span>`:''}</div>${q.notes?`<div class="qp-note">${esc(q.notes)}</div>`:''}<div class="b-actions">${actionHTML}</div></div>`;
+}
+function openQuickPrint(i){
+  const q=i>=0?D.quickPrints[i]:{name:'',kind:'Whim',date:day(),filamentId:D.inv.filament[0]?.id||'',grams:'',projectId:'',iteration:'',orientation:'Flat',supportType:'None',supportBase:'Model material',supportInterface:'None',supportIssue:'None',result:'Saved',failure:'',notes:''};
+  const stockNote = q.filamentId && findFil(q.filamentId) && findFil(q.filamentId).g==null ? `<div class="banner" style="margin-top:10px"><span>${esc(filamentName(findFil(q.filamentId),true))} stock is not set. Save works, but inventory cannot subtract grams until stock is set.</span></div>` : '';
+  openSheet(`<h3>${i>=0?'Edit quick print':'Save quick print'}</h3><div class="lbl">Title</div><input class="field" id="q-name" value="${attr(q.name||'')}" placeholder="e.g. Transparent PETG frame test"><div class="row2"><div><div class="lbl">Type</div><select class="field" id="q-kind">${['Whim','Material Test','Project Attempt'].map(x=>`<option ${x===q.kind?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Result</div><select class="field" id="q-result">${['Saved','Success','Failed','Mixed'].map(x=>`<option ${x===q.result?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Filament</div><input type="hidden" id="q-fil" value="${attr(q.filamentId)}"><div id="q-fil-selected">${quickFilamentSelectedHTML(q.filamentId)}</div><div class="pick-list" id="q-fil-picker" style="display:none"></div>${stockNote}<div class="row2"><div><div class="lbl">Grams used</div><input class="field mono" id="q-grams" inputmode="decimal" value="${attr(q.grams||'')}" placeholder="e.g. 63"></div><div><div class="lbl">Attach to project? optional</div><select class="field" id="q-proj"><option value="">Standalone quick print</option>${D.projects.map(p=>`<option value="${attr(p.id)}" ${p.id===q.projectId?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Orientation</div><select class="field" id="q-orient">${['Flat','Upright','Angled','Face up','Face down','Split model','Custom'].map(x=>`<option ${x===q.orientation?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support type</div><select class="field" id="q-support">${['None','Tree/Organic','Normal','Hybrid','Painted/Manual'].map(x=>`<option ${x===q.supportType?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Support base</div><select class="field" id="q-sbase">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportBase?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support interface</div><select class="field" id="q-sint">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportInterface?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Support / orientation outcome</div><select class="field" id="q-sissue">${['None','Supports clean','Supports hard but removable','Supports trapped','Damaged surface','Damaged function','Warping/lift','Wobble/knocked loose'].map(x=>`<option ${x===q.supportIssue?'selected':''}>${x}</option>`).join('')}</select><div class="lbl">Failure / issue</div><input class="field" id="q-failure" value="${attr(q.failure||'')}" placeholder="e.g. supports trapped in groove"><div class="lbl">Notes / what happened</div><textarea class="field" id="q-notes">${esc(q.notes||'')}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveQuickPrint(${i},false)">Save print</button><button class="btn ghost" onclick="saveQuickPrint(${i},true)">Save as project</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="deleteQuickPrint(${i})">Delete</button>`:''}</div>`);
+}
+function applyQuickPrintEffects(q,old){
+  const oldGrams=old?(Number(old.grams)||0):0;
+  const newGrams=Number(q.grams)||0;
+  if(old&&old.filamentId&&old.filamentId!==q.filamentId){const oldF=findFil(old.filamentId);if(oldF&&oldF.g!=null&&oldGrams)oldF.g=Math.max(0,Number(oldF.g)+oldGrams);}
+  const f=q.filamentId?findFil(q.filamentId):null;
+  if(f){
+    f.tests=f.tests||[];
+    const existing=f.tests.find(t=>t.id===q.id);
+    const log={id:q.id,date:q.date,kind:q.kind,result:q.result,orientation:q.orientation,supportIssue:q.supportIssue,notes:q.notes,grams:q.grams};
+    if(existing)Object.assign(existing,log);else f.tests.push(log);
+    if(f.g!=null){
+      if(old&&old.filamentId===q.filamentId){const delta=newGrams-oldGrams;if(delta)f.g=Math.max(0,Number(f.g)-delta);}
+      else if(newGrams)f.g=Math.max(0,Number(f.g)-newGrams);
+    }
+  }
+  if(!old)D.materialUsed+=(Number(q.grams)||0);else D.materialUsed+=Math.max(0,newGrams-oldGrams);
+  D.projects.forEach(p=>{if(p.attempts)p.attempts=p.attempts.filter(a=>a.quickId!==q.id);});
+  if(q.projectId){const p=byId(D.projects,q.projectId);if(p){p.attempts=p.attempts||[];p.attempts.push({id:uid('pa'),quickId:q.id,date:q.date,result:q.result,orientation:q.orientation,filamentId:q.filamentId,notes:q.notes});}}
+}
+function saveQuickPrint(i,asProject){
+  const old=i>=0?D.quickPrints[i]:null;
+  const obj={id:old?old.id:uid('q'),name:document.getElementById('q-name').value.trim()||'Untitled quick print',kind:document.getElementById('q-kind').value,date:old?old.date:day(),filamentId:document.getElementById('q-fil').value,grams:parseFloat(document.getElementById('q-grams').value)||0,projectId:document.getElementById('q-proj').value,orientation:document.getElementById('q-orient').value,supportType:document.getElementById('q-support').value,supportBase:document.getElementById('q-sbase').value,supportInterface:document.getElementById('q-sint').value,supportIssue:document.getElementById('q-sissue').value,result:document.getElementById('q-result').value,failure:document.getElementById('q-failure').value.trim(),notes:document.getElementById('q-notes').value.trim()};
+  if(i>=0)D.quickPrints[i]=obj;else D.quickPrints.push(obj);
+  applyQuickPrintEffects(obj,old);generateSuggestionsFromQuick(obj);save();renderAll();
+  if(asProject){convertQuickToProject(obj.id);return;}
+  closeSheet();toast('Quick print saved');
+}
+function convertQuickToProject(id){
+  const q=byId(D.quickPrints,id);if(!q)return;
+  const f=q.filamentId?findFil(q.filamentId):null;
+  const p={id:uid('b'),name:(q.name&&q.name.trim()?q.name:'Quick print project'),type:q.kind||'Quick Print',status:q.result==='Failed'?'failed':'queue',priority:Math.max(1,D.projects.length+1),phase:1,started:q.date||mon(),nextAction:q.result==='Failed'?'Review failed print and decide next iteration':'Decide next step',blocking:'',notes:[q.failure,q.notes].filter(Boolean).join('\n'),est:Number(q.grams)||0,used:Number(q.grams)||0,schemeId:'',colors:f?[{hex:f.c,label:filamentName?filamentName(f,true):f.name}]:[],materials:f?[{id:uid('m'),invId:f.id,name:filamentName?filamentName(f,true):f.name,type:f.type,color:f.c,grams:Number(q.grams)||0}]:[],hardware:[],tasks:[],knowledgeIds:[],iterations:[],attempts:[{id:uid('pa'),quickId:q.id,date:q.date,result:q.result,orientation:q.orientation,filamentId:q.filamentId,notes:q.notes}]};
+  D.projects.push(p);q.projectId=p.id;save();renderAll();closeSheet();toast('Saved as project');go('projects');
 }
 
 function renderAll(){renderStats();renderDashboard();renderDashboardExtras();renderInv();renderProjects();renderQuick();renderKnowledge();renderProc();refreshInboxDot();}
