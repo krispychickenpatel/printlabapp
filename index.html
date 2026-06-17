@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Print Lab">
 <meta name="theme-color" content="#16161A">
-<title>Print Lab v5.3 PERSISTENCE HOTFIX — Project System</title>
+<title>Print Lab v5.4 — Project System</title>
 <style>
 :root{
   --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--surface3:#303039;--line:#34343C;
@@ -164,8 +164,1309 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 <div class="toast" id="toast"></div>
 
 <script>
+
 const KEY='printlab_app';
 const OLDKEYS=['printlab_app_v52','printlab_app_v51','printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2','printlab_app_v52_auto','printlab_app_v51_auto','printlab_app_v5_auto'];
+/* Embedded known-good snapshot (2026-06-17). Used ONLY when no saved data exists on this device, so a wipe restores to this instead of blank. */
+const SEED_DATA={
+  "version": 5.3,
+  "updated": "2026-06-17T18:41:06.655Z",
+  "materialUsed": 551,
+  "lastBackup": "2026-06-17T17:01:03.528Z",
+  "inbox": [],
+  "quickPrints": [
+    {
+      "id": "qmqibhi1j0xwp",
+      "name": "4x6 Picture Frame",
+      "kind": "Whim",
+      "date": "Jun 17, 2026",
+      "filamentId": "f009",
+      "grams": 129,
+      "projectId": "",
+      "orientation": "Flat",
+      "supportType": "Tree/Organic",
+      "supportBase": "Model material",
+      "supportInterface": "Model material",
+      "supportIssue": "Supports trapped",
+      "result": "Failed",
+      "failure": "Supports trapped in grooves",
+      "notes": "Did this print to test the transparent petg. Print quality is good but when asking AI for orientation it did not consider supports so they bonded and became too hard to remove"
+    },
+    {
+      "id": "qmqidki15cjl0",
+      "name": "PETG Test Benchy",
+      "kind": "Material Test",
+      "date": "Jun 17, 2026",
+      "filamentId": "f010",
+      "grams": 13,
+      "projectId": "",
+      "orientation": "Flat",
+      "supportType": "None",
+      "supportBase": "Model material",
+      "supportInterface": "None",
+      "supportIssue": "None",
+      "result": "Success",
+      "failure": "",
+      "notes": "Unbranded Orange PETG is usable"
+    },
+    {
+      "id": "qmqiet7vlh8dj",
+      "name": "Rayquaza Ornamental Statue",
+      "kind": "Project Attempt",
+      "date": "Jun 17, 2026",
+      "filamentId": "f001",
+      "grams": 99,
+      "projectId": "bmqiet7vsqyho",
+      "orientation": "Flat",
+      "supportType": "Tree/Organic",
+      "supportBase": "Model material",
+      "supportInterface": "Model material",
+      "supportIssue": "Supports clean",
+      "result": "Success",
+      "failure": "",
+      "notes": "Was the first detailed test print"
+    },
+    {
+      "id": "qmqieuuejks1g",
+      "name": "Quick Release Poop Bucket",
+      "kind": "Whim",
+      "date": "Jun 17, 2026",
+      "filamentId": "f001",
+      "grams": 63,
+      "projectId": "",
+      "orientation": "Flat",
+      "supportType": "None",
+      "supportBase": "Model material",
+      "supportInterface": "None",
+      "supportIssue": "None",
+      "result": "Success",
+      "failure": "",
+      "notes": "Poop chute print"
+    },
+    {
+      "id": "qmqievoeyy5ya",
+      "name": "Fidget Knife",
+      "kind": "Project Attempt",
+      "date": "Jun 17, 2026",
+      "filamentId": "f001",
+      "grams": 21,
+      "projectId": "bmqievof680i6",
+      "orientation": "Flat",
+      "supportType": "None",
+      "supportBase": "Model material",
+      "supportInterface": "None",
+      "supportIssue": "None",
+      "result": "Success",
+      "failure": "",
+      "notes": ""
+    },
+    {
+      "id": "qmqiex0vti0sq",
+      "name": "Fidget Knife",
+      "kind": "Material Test",
+      "date": "Jun 17, 2026",
+      "filamentId": "f007",
+      "grams": 19,
+      "projectId": "bmqievof680i6",
+      "orientation": "Flat",
+      "supportType": "None",
+      "supportBase": "Model material",
+      "supportInterface": "None",
+      "supportIssue": "None",
+      "result": "Mixed",
+      "failure": "",
+      "notes": "Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action."
+    },
+    {
+      "id": "qmqieyyvt314q",
+      "name": "NASA Fabric",
+      "kind": "Whim",
+      "date": "Jun 17, 2026",
+      "filamentId": "f001",
+      "grams": 44,
+      "projectId": "",
+      "orientation": "Flat",
+      "supportType": "None",
+      "supportBase": "Model material",
+      "supportInterface": "None",
+      "supportIssue": "None",
+      "result": "Success",
+      "failure": "",
+      "notes": "One of the first prints to test quality"
+    },
+    {
+      "id": "qmqif07e77kig",
+      "name": "Switch Knife",
+      "kind": "Whim",
+      "date": "Jun 17, 2026",
+      "filamentId": "f001",
+      "grams": 34,
+      "projectId": "",
+      "orientation": "Flat",
+      "supportType": "None",
+      "supportBase": "Model material",
+      "supportInterface": "None",
+      "supportIssue": "None",
+      "result": "Saved",
+      "failure": "",
+      "notes": ""
+    }
+  ],
+  "suggestions": [
+    {
+      "id": "sgmqibhi1kvarq",
+      "date": "Jun 17, 2026",
+      "title": "Avoid trapped supports in functional/internal geometry",
+      "category": "Orientation",
+      "body": "Print \"4x6 Picture Frame\" failed because supports were trapped. For similar geometry, reorient, use support blockers, split the model, or use full dissolvable support if the scaffold cannot be physically removed.",
+      "source": "Quick Print: 4x6 Picture Frame",
+      "sourceId": "qmqibhi1j0xwp",
+      "status": "saved"
+    },
+    {
+      "id": "sgmqibhi1kub5e",
+      "date": "Jun 17, 2026",
+      "title": "Flat orientation caused: Supports trapped",
+      "category": "Orientation",
+      "body": "On \"4x6 Picture Frame\", orientation was Flat, support type was Tree/Organic, support base was Model material, interface was Model material, and outcome was Supports trapped. Supports trapped in grooves",
+      "source": "Quick Print: 4x6 Picture Frame",
+      "sourceId": "qmqibhi1j0xwp",
+      "status": "saved"
+    },
+    {
+      "id": "sgmqidki171lrl",
+      "date": "Jun 17, 2026",
+      "title": "PETG Basic material test result: Success",
+      "category": "Materials",
+      "body": "Material test on PETG Basic. Result: Success. Orientation: Flat. Supports: None. Issue: None. Notes: Unbranded Orange PETG is usable",
+      "source": "Quick Print: PETG Test Benchy",
+      "sourceId": "qmqidki15cjl0",
+      "status": "saved"
+    },
+    {
+      "id": "sgmqiet7vnerwc",
+      "date": "Jun 17, 2026",
+      "title": "Flat orientation caused: Supports clean",
+      "category": "Orientation",
+      "body": "On \"Rayquaza Ornamental Statue\", orientation was Flat, support type was Tree/Organic, support base was Model material, interface was Model material, and outcome was Supports clean. Was the first detailed test print",
+      "source": "Quick Print: Rayquaza Ornamental Statue",
+      "sourceId": "qmqiet7vlh8dj",
+      "status": "saved"
+    },
+    {
+      "id": "sgmqiex0vtysff",
+      "date": "Jun 17, 2026",
+      "title": "Sunlu PETG Basic material test result: Saved",
+      "category": "Materials",
+      "body": "Material test on PETG Basic. Result: Saved. Orientation: Flat. Supports: None. Issue: None. Notes: Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action.",
+      "source": "Quick Print: Fidget Knife",
+      "sourceId": "qmqiex0vti0sq",
+      "status": "saved"
+    },
+    {
+      "id": "sgmqiex9dpqfbc",
+      "date": "Jun 17, 2026",
+      "title": "Sunlu PETG Basic material test result: Success",
+      "category": "Materials",
+      "body": "Material test on PETG Basic. Result: Success. Orientation: Flat. Supports: None. Issue: None. Notes: Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action.",
+      "source": "Quick Print: Fidget Knife",
+      "sourceId": "qmqiex0vti0sq",
+      "status": "saved"
+    },
+    {
+      "id": "sgmqiexclj8rmf",
+      "date": "Jun 17, 2026",
+      "title": "Sunlu PETG Basic material test result: Mixed",
+      "category": "Materials",
+      "body": "Material test on PETG Basic. Result: Mixed. Orientation: Flat. Supports: None. Issue: None. Notes: Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action.",
+      "source": "Quick Print: Fidget Knife",
+      "sourceId": "qmqiex0vti0sq",
+      "status": "saved"
+    }
+  ],
+  "inv": {
+    "filament": [
+      {
+        "id": "f001",
+        "brand": "Bambu",
+        "type": "PLA",
+        "variant": "Matte",
+        "name": "PLA Matte",
+        "c": "#f0eee8",
+        "transparent": false,
+        "g": 339,
+        "spool": 1000,
+        "cost": 33.88,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": [
+          {
+            "id": "qmqiet7vlh8dj",
+            "date": "Jun 17, 2026",
+            "kind": "Project Attempt",
+            "result": "Success",
+            "orientation": "Flat",
+            "supportIssue": "Supports clean",
+            "notes": "Was the first detailed test print",
+            "grams": 99
+          },
+          {
+            "id": "qmqieuuejks1g",
+            "date": "Jun 17, 2026",
+            "kind": "Whim",
+            "result": "Success",
+            "orientation": "Flat",
+            "supportIssue": "None",
+            "notes": "Poop chute print",
+            "grams": 63
+          },
+          {
+            "id": "qmqievoeyy5ya",
+            "date": "Jun 17, 2026",
+            "kind": "Project Attempt",
+            "result": "Success",
+            "orientation": "Flat",
+            "supportIssue": "None",
+            "notes": "",
+            "grams": 21
+          },
+          {
+            "id": "qmqieyyvt314q",
+            "date": "Jun 17, 2026",
+            "kind": "Whim",
+            "result": "Success",
+            "orientation": "Flat",
+            "supportIssue": "None",
+            "notes": "One of the first prints to test quality",
+            "grams": 44
+          },
+          {
+            "id": "qmqif07e77kig",
+            "date": "Jun 17, 2026",
+            "kind": "Whim",
+            "result": "Saved",
+            "orientation": "Flat",
+            "supportIssue": "None",
+            "notes": "",
+            "grams": 34
+          }
+        ]
+      },
+      {
+        "id": "f002",
+        "brand": "Bambu",
+        "type": "PLA",
+        "variant": "Matte Mandarin",
+        "name": "PLA Matte Mandarin",
+        "c": "#e0652f",
+        "transparent": false,
+        "g": 1000,
+        "spool": 1000,
+        "cost": 22.02,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      },
+      {
+        "id": "f003",
+        "brand": "Bambu",
+        "type": "PLA",
+        "variant": "Matte Scarlet",
+        "name": "PLA Matte Scarlet",
+        "c": "#e24b4a",
+        "transparent": false,
+        "g": 1000,
+        "spool": 1000,
+        "cost": 22.02,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      },
+      {
+        "id": "f004",
+        "brand": "Bambu",
+        "type": "PLA",
+        "variant": "Matte Charcoal",
+        "name": "PLA Matte Charcoal",
+        "c": "#000000",
+        "transparent": false,
+        "g": 1000,
+        "spool": 1000,
+        "cost": 22.02,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      },
+      {
+        "id": "f005",
+        "brand": "Bambu",
+        "type": "PLA",
+        "variant": "Matte Lilac",
+        "name": "PLA Matte Lilac",
+        "c": "#7f77dd",
+        "transparent": false,
+        "g": 1000,
+        "spool": 1000,
+        "cost": 19.09,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      },
+      {
+        "id": "f006",
+        "brand": "Bambu",
+        "type": "PLA",
+        "variant": "Matte Ash",
+        "name": "PLA Matte Ash",
+        "c": "#888780",
+        "transparent": false,
+        "g": 1000,
+        "spool": 1000,
+        "cost": 22.02,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      },
+      {
+        "id": "f007",
+        "brand": "Sunlu",
+        "type": "PETG",
+        "variant": "Basic",
+        "name": "PETG Basic",
+        "c": "#000000",
+        "transparent": false,
+        "g": 581,
+        "spool": 1000,
+        "cost": 28.23,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": [
+          {
+            "id": "qmqiex0vti0sq",
+            "date": "Jun 17, 2026",
+            "kind": "Material Test",
+            "result": "Mixed",
+            "orientation": "Flat",
+            "supportIssue": "None",
+            "notes": "Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action.",
+            "grams": 19
+          }
+        ]
+      },
+      {
+        "id": "f008",
+        "brand": "Bambu",
+        "type": "PETG",
+        "variant": "Basic Navy",
+        "name": "PETG Basic Navy",
+        "c": "#185fa5",
+        "transparent": false,
+        "g": 1000,
+        "spool": 1000,
+        "cost": 21.29,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      },
+      {
+        "id": "f009",
+        "brand": "",
+        "type": "PETG",
+        "variant": "Transparent",
+        "name": "PETG Transparent",
+        "c": "#b5d4f4",
+        "transparent": true,
+        "g": 492,
+        "spool": 1000,
+        "cost": 0,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": [
+          {
+            "id": "qmqi895tnw2z8",
+            "date": "Jun 17, 2026",
+            "kind": "Whim",
+            "result": "Failed",
+            "orientation": "Flat",
+            "supportIssue": "Supports trapped",
+            "notes": "Did this print to test the PETG transparent. Print quality was good I am satisfied. However AI guided me to print it flat which led to trapped supports. Product not usable.",
+            "grams": 129
+          },
+          {
+            "id": "qmqibhi1j0xwp",
+            "date": "Jun 17, 2026",
+            "kind": "Whim",
+            "result": "Failed",
+            "orientation": "Flat",
+            "supportIssue": "Supports trapped",
+            "notes": "Did this print to test the transparent petg. Print quality is good but when asking AI for orientation it did not consider supports so they bonded and became too hard to remove",
+            "grams": 129
+          }
+        ]
+      },
+      {
+        "id": "f010",
+        "brand": "",
+        "type": "PETG",
+        "variant": "Basic",
+        "name": "PETG Basic",
+        "c": "#ef9f27",
+        "transparent": false,
+        "g": 737,
+        "spool": 1000,
+        "cost": 0,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": [
+          {
+            "id": "qmqidki15cjl0",
+            "date": "Jun 17, 2026",
+            "kind": "Material Test",
+            "result": "Success",
+            "orientation": "Flat",
+            "supportIssue": "None",
+            "notes": "Unbranded Orange PETG is usable",
+            "grams": 13
+          }
+        ]
+      },
+      {
+        "id": "f011",
+        "brand": "Bambu",
+        "type": "PVA",
+        "variant": "Clear",
+        "name": "PVA Clear",
+        "c": "#e1f5ee",
+        "transparent": true,
+        "g": 500,
+        "spool": 500,
+        "cost": 54.73,
+        "best": {
+          "nozzle": "",
+          "bed": ""
+        },
+        "tests": []
+      }
+    ],
+    "hardware": [
+      {
+        "id": "h001",
+        "name": "M3 heat-set brass inserts",
+        "category": "Fasteners",
+        "qty": 0,
+        "unit": "pcs",
+        "min": 20,
+        "notes": "Threaded joints and durable screw bosses"
+      },
+      {
+        "id": "h002",
+        "name": "M3 screws + nuts",
+        "category": "Fasteners",
+        "qty": 0,
+        "unit": "pcs",
+        "min": 50,
+        "notes": "General assemblies"
+      },
+      {
+        "id": "h003",
+        "name": "Compression springs",
+        "category": "Motion",
+        "qty": 0,
+        "unit": "pcs",
+        "min": 6,
+        "notes": "Pawl springs, detents, shock analogs"
+      },
+      {
+        "id": "h004",
+        "name": "608 bearings",
+        "category": "Bearings",
+        "qty": 0,
+        "unit": "pcs",
+        "min": 6,
+        "notes": "Gear shafts and rotating assemblies"
+      },
+      {
+        "id": "h005",
+        "name": "M6/M8 threaded rod + nuts",
+        "category": "Motion",
+        "qty": 0,
+        "unit": "pcs",
+        "min": 1,
+        "notes": "Desk vise leadscrew"
+      },
+      {
+        "id": "hmqidwaxv4f8p",
+        "name": "BT2.6x8 SHCS Self Tapping Screw",
+        "category": "Fasteners",
+        "qty": 20,
+        "unit": "pcs",
+        "min": 0,
+        "notes": "AA004"
+      },
+      {
+        "id": "hmqidwvril7ph",
+        "name": "Rubber Bands 1.4x20mm",
+        "category": "Motion",
+        "qty": 100,
+        "unit": "pcs",
+        "min": 0,
+        "notes": ""
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "b001",
+      "name": "Mechanical business card",
+      "type": "Mechanical",
+      "status": "queue",
+      "priority": 2,
+      "phase": 1,
+      "started": "Jun 2026",
+      "nextAction": "Install Fusion 360 and model the base plate",
+      "blocking": "Fusion 360 install",
+      "notes": "110×70×12mm. Gear train, rack & pinion, ratchet + pawl. Design phase.",
+      "est": 83,
+      "used": 0,
+      "schemeId": "s001",
+      "colors": [
+        {
+          "hex": "#2C2C2A",
+          "label": "PETG Black base"
+        },
+        {
+          "hex": "#444441",
+          "label": "PLA Charcoal cover"
+        },
+        {
+          "hex": "#E0652F",
+          "label": "PLA Orange drive gear"
+        },
+        {
+          "hex": "#888780",
+          "label": "PLA Ash Gray driven"
+        },
+        {
+          "hex": "#E24B4A",
+          "label": "PLA Red pawl"
+        }
+      ],
+      "materials": [
+        {
+          "id": "m001",
+          "invId": "f002",
+          "name": "PLA Mandarin Orange",
+          "type": "PLA",
+          "color": "#E0652F",
+          "grams": 40
+        },
+        {
+          "id": "m002",
+          "invId": "f006",
+          "name": "PLA Ash Gray",
+          "type": "PLA",
+          "color": "#888780",
+          "grams": 30
+        },
+        {
+          "id": "m003",
+          "invId": "f007",
+          "name": "PETG Black",
+          "type": "PETG",
+          "color": "#2C2C2A",
+          "grams": 60
+        }
+      ],
+      "hardware": [
+        {
+          "id": "r001",
+          "invId": "h001",
+          "name": "M3 heat-set brass inserts",
+          "qty": 8,
+          "unit": "pcs"
+        },
+        {
+          "id": "r002",
+          "invId": "h002",
+          "name": "M3 screws + nuts",
+          "qty": 16,
+          "unit": "pcs"
+        },
+        {
+          "id": "r003",
+          "invId": "h003",
+          "name": "Compression springs",
+          "qty": 2,
+          "unit": "pcs"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "t001",
+          "text": "Fusion base plate",
+          "done": false
+        },
+        {
+          "id": "t002",
+          "text": "Gear train layout",
+          "done": false
+        },
+        {
+          "id": "t003",
+          "text": "Ratchet + pawl tolerance test",
+          "done": false
+        }
+      ],
+      "knowledgeIds": [
+        "k001",
+        "k002"
+      ],
+      "iterations": []
+    },
+    {
+      "id": "b003",
+      "name": "Articulating landing gear",
+      "type": "Aircraft",
+      "status": "queue",
+      "priority": 3,
+      "phase": 1,
+      "started": null,
+      "nextAction": "Build smaller linkage tolerance test before full assembly",
+      "blocking": "Fusion comfort level",
+      "notes": "Oleo strut + scissors linkage. AME-relevant portfolio model.",
+      "est": 200,
+      "used": 0,
+      "schemeId": "s006",
+      "colors": [],
+      "materials": [
+        {
+          "id": "m005",
+          "invId": "f006",
+          "name": "PLA Ash Gray",
+          "type": "PLA",
+          "color": "#888780",
+          "grams": 100
+        },
+        {
+          "id": "m006",
+          "invId": "f008",
+          "name": "PETG Navy Blue",
+          "type": "PETG",
+          "color": "#185FA5",
+          "grams": 100
+        }
+      ],
+      "hardware": [
+        {
+          "id": "r006",
+          "invId": "h004",
+          "name": "608 bearings",
+          "qty": 4,
+          "unit": "pcs"
+        },
+        {
+          "id": "r007",
+          "invId": "h002",
+          "name": "M3 screws + nuts",
+          "qty": 30,
+          "unit": "pcs"
+        },
+        {
+          "id": "r008",
+          "invId": "h003",
+          "name": "Compression springs",
+          "qty": 2,
+          "unit": "pcs"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "t006",
+          "text": "Research linkage proportions",
+          "done": false
+        },
+        {
+          "id": "t007",
+          "text": "Print hinge tolerance coupon",
+          "done": false
+        }
+      ],
+      "knowledgeIds": [],
+      "iterations": [],
+      "attempts": []
+    },
+    {
+      "id": "b004",
+      "name": "Single cylinder engine",
+      "type": "Mechanical",
+      "status": "queue",
+      "priority": 4,
+      "phase": 3,
+      "started": null,
+      "nextAction": "Wait until landing gear project proves linkage tolerances",
+      "blocking": "Landing gear first",
+      "notes": "Fully articulating, every part self-designed. Portfolio piece.",
+      "est": 400,
+      "used": 0,
+      "schemeId": "s001",
+      "colors": [],
+      "materials": [],
+      "hardware": [
+        {
+          "id": "r009",
+          "invId": "h004",
+          "name": "608 bearings",
+          "qty": 2,
+          "unit": "pcs"
+        },
+        {
+          "id": "r010",
+          "invId": "h002",
+          "name": "M3 screws + nuts",
+          "qty": 40,
+          "unit": "pcs"
+        }
+      ],
+      "tasks": [],
+      "knowledgeIds": [],
+      "iterations": [],
+      "attempts": []
+    },
+    {
+      "id": "bmqidoai1a5xl",
+      "name": "Mechanical Phone Holder",
+      "type": "Mechanical",
+      "status": "active",
+      "priority": 1,
+      "phase": 1,
+      "started": "Jun 2026",
+      "doneDate": null,
+      "nextAction": "Plate 2",
+      "blocking": "Orange PLA",
+      "notes": "",
+      "est": 187,
+      "used": 0,
+      "schemeId": "",
+      "colors": [],
+      "materials": [
+        {
+          "id": "mmqidmqcj5b1j",
+          "invId": "f002",
+          "name": "PLA Matte Mandarin",
+          "type": "PLA",
+          "color": "#e0652f",
+          "transparent": false,
+          "grams": 54
+        },
+        {
+          "id": "mmqidmryx2qy0",
+          "invId": "f001",
+          "name": "PLA Matte",
+          "type": "PLA",
+          "color": "#f0eee8",
+          "transparent": false,
+          "grams": 133
+        }
+      ],
+      "hardware": [
+        {
+          "id": "rmqidx424obf2",
+          "invId": "hmqidwaxv4f8p",
+          "name": "BT2.6x8 SHCS Self Tapping Screw",
+          "qty": 8,
+          "unit": "pcs"
+        },
+        {
+          "id": "rmqidx7c6q9rb",
+          "invId": "hmqidwvril7ph",
+          "name": "Rubber Bands 1.4x20mm",
+          "qty": 1,
+          "unit": "pcs"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "tmqidpeodvpuc",
+          "text": "Plate 1 (White)",
+          "done": true
+        },
+        {
+          "id": "tmqidpn0jr5xt",
+          "text": "Plate 2 (Orange)",
+          "done": false
+        },
+        {
+          "id": "tmqidpsm6r0ou",
+          "text": "Plate 3 (White)",
+          "done": false
+        }
+      ],
+      "knowledgeIds": [],
+      "iterations": []
+    },
+    {
+      "id": "bmqiet7vsqyho",
+      "name": "Rayquaza Ornamental Statue",
+      "type": "Project Attempt",
+      "status": "done",
+      "priority": 6,
+      "phase": 1,
+      "started": "Jun 17, 2026",
+      "nextAction": "Decide next step",
+      "blocking": "",
+      "notes": "Was the first detailed test print",
+      "est": 99,
+      "used": 99,
+      "schemeId": "",
+      "colors": [
+        {
+          "hex": "#f0eee8",
+          "label": "Bambu PLA Matte"
+        }
+      ],
+      "materials": [
+        {
+          "id": "mmqiet7vsqdks",
+          "invId": "f001",
+          "name": "Bambu PLA Matte",
+          "type": "PLA",
+          "color": "#f0eee8",
+          "grams": 99
+        }
+      ],
+      "hardware": [],
+      "tasks": [],
+      "knowledgeIds": [],
+      "iterations": [],
+      "attempts": [
+        {
+          "id": "pamqiet7vstmls",
+          "quickId": "qmqiet7vlh8dj",
+          "date": "Jun 17, 2026",
+          "result": "Success",
+          "orientation": "Flat",
+          "filamentId": "f001",
+          "notes": "Was the first detailed test print"
+        }
+      ],
+      "doneDate": "Jun 2026"
+    },
+    {
+      "id": "bmqievof680i6",
+      "name": "Fidget Knife",
+      "type": "Mechanical",
+      "status": "done",
+      "priority": 7,
+      "phase": 1,
+      "started": "Jun 17, 2026",
+      "doneDate": "Jun 2026",
+      "nextAction": "Decide next step",
+      "blocking": "",
+      "notes": "",
+      "est": 21,
+      "used": 21,
+      "schemeId": "",
+      "colors": [
+        {
+          "hex": "#f0eee8",
+          "label": "Bambu PLA Matte"
+        }
+      ],
+      "materials": [
+        {
+          "id": "mmqievof6rz8a",
+          "invId": "f001",
+          "name": "Bambu PLA Matte",
+          "type": "PLA",
+          "color": "#f0eee8",
+          "grams": 21
+        }
+      ],
+      "hardware": [],
+      "tasks": [],
+      "knowledgeIds": [],
+      "iterations": []
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "k001",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "PETG creeps under sustained spring load",
+      "material": "PETG",
+      "diameter": "",
+      "tags": "spring,detent,creep",
+      "body": "PETG worked mechanically but the spring fidget knife detent slid over time. Avoid PETG for snap/detent members held under constant load."
+    },
+    {
+      "id": "k002",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "PLA holds snap and detent features better",
+      "material": "PLA",
+      "diameter": "",
+      "tags": "snap fit,detent",
+      "body": "PLA Matte held the spring fidget knife detent well. Use PLA for snap fits, pawls, and crisp detents unless heat resistance is required."
+    },
+    {
+      "id": "k003",
+      "date": "Jun 2026",
+      "category": "Workflow",
+      "title": "Material choice is per-component",
+      "material": "",
+      "diameter": "",
+      "tags": "assembly,design",
+      "body": "Do not choose one material for the whole assembly by default. Same project can use PLA for snap parts and PETG for frames or sliding surfaces."
+    },
+    {
+      "id": "kmqidipom745h",
+      "date": "Jun 2026",
+      "category": "Orientation",
+      "title": "Flat orientation caused: Supports trapped",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: 4x6 Picture Frame",
+      "body": "On \"4x6 Picture Frame\", orientation was Flat, support type was Tree/Organic, support base was Model material, interface was Model material, and outcome was Supports trapped. Supports trapped in grooves"
+    },
+    {
+      "id": "kmqidiq3yl8f9",
+      "date": "Jun 2026",
+      "category": "Orientation",
+      "title": "Avoid trapped supports in functional/internal geometry",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: 4x6 Picture Frame",
+      "body": "Print \"4x6 Picture Frame\" failed because supports were trapped. For similar geometry, reorient, use support blockers, split the model, or use full dissolvable support if the scaffold cannot be physically removed."
+    },
+    {
+      "id": "kmqif0qh1k2pc",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "PVA should be used as support interface only when the PLA su",
+      "material": "PVA",
+      "diameter": "",
+      "tags": "inbox",
+      "body": "PVA should be used as support interface only when the PLA support base can still physically come out after dissolving. PLA support base + PVA interface saves PVA, but it will not help if the PLA scaffold is trapped inside a closed cavity"
+    },
+    {
+      "id": "kmqif0y7chy52",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "Flat orientation can be bad if it creates supports inside pl",
+      "material": "",
+      "diameter": "",
+      "tags": "inbox",
+      "body": "Flat orientation can be bad if it creates supports inside places I cannot remove them from."
+    },
+    {
+      "id": "kmqif14leoyvn",
+      "date": "Jun 2026",
+      "category": "Failures",
+      "title": "If PVA interface is used, support Z gap can be tighter becau",
+      "material": "PVA",
+      "diameter": "",
+      "tags": "inbox",
+      "body": "If PVA interface is used, support Z gap can be tighter because removal happens by dissolving instead of snapping of"
+    },
+    {
+      "id": "kmqif18p37kbq",
+      "date": "Jun 2026",
+      "category": "Failures",
+      "title": "Dry PVA before use and keep it dry because wet PVA can strin",
+      "material": "PVA",
+      "diameter": "",
+      "tags": "inbox",
+      "body": "Dry PVA before use and keep it dry because wet PVA can string and print badly"
+    },
+    {
+      "id": "kmqif1fl6wuv3",
+      "date": "Jun 2026",
+      "category": "Lessons",
+      "title": "Bambu Studio for normal prints OrcaSlicer for calibration/tu",
+      "material": "",
+      "diameter": "",
+      "tags": "inbox",
+      "body": "Bambu Studio for normal prints OrcaSlicer for calibration/tuning/advanced prints"
+    },
+    {
+      "id": "kmqif1tsckizs",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "PETG Basic material test result: Success",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: PETG Test Benchy",
+      "body": "Material test on PETG Basic. Result: Success. Orientation: Flat. Supports: None. Issue: None. Notes: Unbranded Orange PETG is usable"
+    },
+    {
+      "id": "kmqif1uatj90k",
+      "date": "Jun 2026",
+      "category": "Orientation",
+      "title": "Flat orientation caused: Supports clean",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: Rayquaza Ornamental Statue",
+      "body": "On \"Rayquaza Ornamental Statue\", orientation was Flat, support type was Tree/Organic, support base was Model material, interface was Model material, and outcome was Supports clean. Was the first detailed test print"
+    },
+    {
+      "id": "kmqif1unbuh10",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "Sunlu PETG Basic material test result: Saved",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: Fidget Knife",
+      "body": "Material test on PETG Basic. Result: Saved. Orientation: Flat. Supports: None. Issue: None. Notes: Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action."
+    },
+    {
+      "id": "kmqif1uuqlv63",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "Sunlu PETG Basic material test result: Success",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: Fidget Knife",
+      "body": "Material test on PETG Basic. Result: Success. Orientation: Flat. Supports: None. Issue: None. Notes: Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action."
+    },
+    {
+      "id": "kmqif1v5ergs2",
+      "date": "Jun 2026",
+      "category": "Materials",
+      "title": "Sunlu PETG Basic material test result: Mixed",
+      "material": "",
+      "diameter": "",
+      "tags": "suggested,Quick Print: Fidget Knife",
+      "body": "Material test on PETG Basic. Result: Mixed. Orientation: Flat. Supports: None. Issue: None. Notes: Noticed that PETG slides a lot more easier. Friction wasn’t great here to help with the fidget action."
+    }
+  ],
+  "procurement": {
+    "manual": [
+      {
+        "id": "p001",
+        "name": "Digital calipers",
+        "category": "Tools",
+        "qty": 1,
+        "unit": "pcs",
+        "source": "Amazon / Sayal",
+        "projectId": "",
+        "got": false,
+        "notes": "Useful for hardware measurements and tolerance coupons"
+      },
+      {
+        "id": "p002",
+        "name": "Deburring tool / small files",
+        "category": "Tools",
+        "qty": 1,
+        "unit": "set",
+        "source": "Amazon / Princess Auto",
+        "projectId": "",
+        "got": false,
+        "notes": "Clean holes, edges, support scars"
+      }
+    ]
+  },
+  "standards": [
+    {
+      "id": "st001",
+      "topic": "Snap fits / detents",
+      "recommendation": "PLA",
+      "notes": "Holds snap better; PETG creep observed under spring load"
+    },
+    {
+      "id": "st002",
+      "topic": "Sustained spring load",
+      "recommendation": "PLA or metal hardware",
+      "notes": "Avoid PETG for loaded detents/pawls"
+    },
+    {
+      "id": "st003",
+      "topic": "Chassis / housings",
+      "recommendation": "PETG",
+      "notes": "Good toughness and dimensional stability"
+    },
+    {
+      "id": "st004",
+      "topic": "Sliding surfaces",
+      "recommendation": "PETG",
+      "notes": "Better wear resistance than basic PLA"
+    },
+    {
+      "id": "st005",
+      "topic": "Gear faces",
+      "recommendation": "PLA/PLA or PLA/PETG",
+      "notes": "Prototype and compare noise/friction"
+    },
+    {
+      "id": "st006",
+      "topic": "Axle pins / shear",
+      "recommendation": "PETG or metal",
+      "notes": "Prefer metal for high load"
+    },
+    {
+      "id": "st007",
+      "topic": "Outdoor / heat",
+      "recommendation": "PETG / ASA",
+      "notes": "PLA can soften in heat"
+    },
+    {
+      "id": "st008",
+      "topic": "Complex overhangs",
+      "recommendation": "PVA support",
+      "notes": "Dissolves cleanly"
+    },
+    {
+      "id": "st009",
+      "topic": "Display / low stress",
+      "recommendation": "PLA Matte",
+      "notes": "Best surface finish"
+    }
+  ],
+  "schemes": [
+    {
+      "id": "s001",
+      "name": "Mechanical",
+      "colors": [
+        {
+          "hex": "#2C2C2A",
+          "label": "PETG Black"
+        },
+        {
+          "hex": "#E0652F",
+          "label": "Orange accent"
+        },
+        {
+          "hex": "#888780",
+          "label": "Ash Gray"
+        },
+        {
+          "hex": "#444441",
+          "label": "Charcoal"
+        },
+        {
+          "hex": "#E24B4A",
+          "label": "Red marker"
+        }
+      ],
+      "use": "Business card, mechanical display"
+    },
+    {
+      "id": "s002",
+      "name": "Studio",
+      "colors": [
+        {
+          "hex": "#444441",
+          "label": "Charcoal"
+        },
+        {
+          "hex": "#E0652F",
+          "label": "Orange accent"
+        },
+        {
+          "hex": "#888780",
+          "label": "Ash Gray"
+        }
+      ],
+      "use": "Desk tools and fixtures"
+    },
+    {
+      "id": "s003",
+      "name": "Ocean/Night",
+      "colors": [
+        {
+          "hex": "#185FA5",
+          "label": "Navy Blue"
+        },
+        {
+          "hex": "#2C2C2A",
+          "label": "PETG Black"
+        },
+        {
+          "hex": "#F0EEE8",
+          "label": "Matte White"
+        }
+      ],
+      "use": "Planters, geometric pieces"
+    },
+    {
+      "id": "s004",
+      "name": "Arcane",
+      "colors": [
+        {
+          "hex": "#7F77DD",
+          "label": "Lilac"
+        },
+        {
+          "hex": "#E24B4A",
+          "label": "Scarlet"
+        },
+        {
+          "hex": "#444441",
+          "label": "Charcoal"
+        }
+      ],
+      "use": "Terrain, dice, display"
+    },
+    {
+      "id": "s005",
+      "name": "Warm Neutral",
+      "colors": [
+        {
+          "hex": "#E0652F",
+          "label": "Orange"
+        },
+        {
+          "hex": "#F0EEE8",
+          "label": "White"
+        },
+        {
+          "hex": "#888780",
+          "label": "Ash Gray"
+        }
+      ],
+      "use": "Planters and kitchen items"
+    },
+    {
+      "id": "s006",
+      "name": "Aircraft",
+      "colors": [
+        {
+          "hex": "#888780",
+          "label": "Ash Gray"
+        },
+        {
+          "hex": "#F0EEE8",
+          "label": "Matte White"
+        },
+        {
+          "hex": "#185FA5",
+          "label": "Navy Blue"
+        }
+      ],
+      "use": "AME models, landing gear, aircraft systems"
+    }
+  ]
+};
 let D;
 let invMode='filament';
 let projectFilter='open';
@@ -250,10 +1551,9 @@ function freshData(){return{
 function migrateOld(o){
   const n=freshData();
   n.updated=o.updated||null;n.materialUsed=o.materialUsed||0;n.inbox=o.inbox||[];n.lastBackup=o.lastBackup||null;
-  // v3 already has the right shape
+  // current shape (v3..v5.x): carry EVERYTHING forward so nothing (e.g. quickPrints, suggestions) is ever dropped
   if(o.inv&&!Array.isArray(o.inv)&&o.projects){
-    n.inv=o.inv;n.projects=o.projects;n.knowledge=o.knowledge||n.knowledge;n.procurement=o.procurement||n.procurement;n.standards=o.standards||n.standards;n.schemes=o.schemes||n.schemes;
-    return n;
+    return Object.assign(n,o);
   }
   // v2 shape
   if(Array.isArray(o.inv)) n.inv.filament=o.inv.map((m,i)=>({id:'f'+(i+1).toString().padStart(3,'0'),name:m.name||'Filament',type:m.type||'Other',c:m.c||'#888780',g:m.g==null?null:Number(m.g)||0,spool:1000,cost:null}));
@@ -263,14 +1563,6 @@ function migrateOld(o){
   if(Array.isArray(o.lessons)) n.knowledge=o.lessons.map((l,i)=>({id:'k'+(i+1).toString().padStart(3,'0'),date:l.date||mon(),category:'Lessons',title:(l.text||'Lesson').slice(0,60),material:'',diameter:'',tags:'migrated',body:l.text||''}));
   return n;
 }
-function load(){
-  try{
-    const r=localStorage.getItem(KEY);
-    if(r){D=JSON.parse(r);normalizeData();return;}
-    for(const k of OLDKEYS){const old=localStorage.getItem(k);if(old){D=migrateOld(JSON.parse(old));normalizeData();save(true);return;}}
-    D=freshData();save(true);
-  }catch(e){D=freshData();}
-}
 function normalizeData(){
   if(!D.inv||Array.isArray(D.inv)){D=migrateOld(D);}
   D.inv=D.inv||{filament:[],hardware:[]};D.inv.filament=D.inv.filament||[];D.inv.hardware=D.inv.hardware||[];
@@ -278,22 +1570,9 @@ function normalizeData(){
   D.standards=D.standards||[];D.schemes=D.schemes||[];D.inbox=D.inbox||[];if(D.lastBackup===undefined)D.lastBackup=null;
   D.quickPrints=D.quickPrints||[];D.suggestions=D.suggestions||[];D.inv.filament.forEach(f=>{if(f.brand===undefined)f.brand='';if(f.transparent===undefined)f.transparent=/transparent|clear/i.test((f.name||'')+' '+(f.type||''));if(!f.tests)f.tests=[];if(!f.best)f.best={};});D.projects.forEach(p=>{p.attempts=p.attempts||[];});D.version=5.3;
 }
-function save(silent){
-  D.updated=new Date().toISOString();
-  try{localStorage.setItem(KEY,JSON.stringify(D));localStorage.setItem(KEY+'_auto',JSON.stringify(D));}catch(e){}
-  if(!silent){renderStats();refreshInboxDot();}
-}
 
 function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));document.getElementById('v-'+v).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));window.scrollTo(0,0);renderAll();}
 
-function renderStats(){
-  const open=D.projects.filter(p=>statusOpen(p.status)).length;
-  const active=D.projects.filter(p=>p.status==='active').length;
-  const auto=getAutoNeeds().filter(x=>x.buy>0).length;
-  const low=lowInventory().length;
-  document.getElementById('updated').textContent=D.updated?'Updated '+new Date(D.updated).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'Not yet updated';
-  document.getElementById('stats').innerHTML=stt(active,'Active')+stt(open,'Open')+stt(auto,'To buy')+stt(low,'Low stock')+stt((D.inbox||[]).length,'Inbox')+stt(Math.round(D.materialUsed)+'g','Used');
-}
 function stt(v,l){return `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`;}
 function lowInventory(){
   const a=[];D.inv.filament.forEach(m=>{if(m.g!=null&&m.g<200)a.push({kind:'Filament',name:m.name,detail:Math.round(m.g)+'g left'});});
@@ -342,21 +1621,6 @@ function renderDashboard(){
 }
 
 function setInvMode(m){invMode=m;renderInv();}
-function renderInv(){
-  document.getElementById('inv-fil-btn').classList.toggle('on',invMode==='filament');document.getElementById('inv-hw-btn').classList.toggle('on',invMode==='hardware');
-  const el=document.getElementById('inv-list');
-  if(invMode==='filament'){
-    document.getElementById('inv-sub').textContent=D.inv.filament.length+' spools';
-    el.innerHTML=D.inv.filament.map((m,i)=>{
-      let mid;if(m.g==null){mid=`<div class="ctl"><span class="grams confirm">confirm stock</span><span class="spend"><button class="chip edit" onclick="openInv(${i})">Edit</button></span></div>`;}else{const low=m.g<200,pct=Math.max(2,Math.min(100,m.g/(m.spool||1000)*100));mid=`<div class="bar"><i style="width:${pct}%;background:${m.c}"></i></div><div class="ctl"><span class="grams ${low?'low':''}">${Math.round(m.g)}g${low?' ⚠':''}</span><span class="spend"><button class="chip" onclick="spendFil(${i},10)">−10</button><button class="chip" onclick="spendFil(${i},25)">−25</button><button class="chip" onclick="spendFil(${i},50)">−50</button><button class="chip edit" onclick="openInv(${i})">✎</button></span></div>`;}
-      const cost=m.cost?` · $${Number(m.cost).toFixed(2)} spool`:''; const tests=(m.tests||[]).length;
-      return `<div class="card inv"><div class="top tap" onclick="openInv(${i})">${swatchHTML(m)}<span class="name">${esc((m.brand?m.brand+' ':'')+m.name)}</span><span class="type">${esc(m.type)}</span></div>${mid}<div class="hw-meta">${m.spool?m.spool+'g spool':''}${cost}${m.transparent?' · transparent':''}${tests?' · '+tests+' test logs':''}</div></div>`;
-    }).join('')+`<button class="add-build" onclick="openInv(-1)">+ Add spool</button>`;
-  }else{
-    document.getElementById('inv-sub').textContent=D.inv.hardware.length+' hardware bins';
-    el.innerHTML=D.inv.hardware.map((h,i)=>{const low=(Number(h.min)||0)>0&&(Number(h.qty)||0)<Number(h.min);const used=hardwareRequiredTotal(h);return `<div class="card"><div class="hw-row tap" onclick="openHardware(${i})"><div><div class="hw-name">${esc(h.name)}</div><div class="hw-meta">${esc(h.category||'Hardware')} · min ${fmtQty(h.min,h.unit)}${used?` · open projects need ${fmtQty(used,h.unit)}`:''}${h.notes?' · '+esc(h.notes):''}</div></div><div><div class="qty ${low?'low':''}">${fmtQty(h.qty,h.unit)}${low?' ⚠':''}</div></div></div><div class="b-actions"><button class="act" onclick="adjustHardware(${i},-1)">−1</button><button class="act" onclick="adjustHardware(${i},1)">+1</button><button class="act" onclick="openHardware(${i})">Edit</button></div></div>`;}).join('')+`<button class="add-build" onclick="openHardware(-1)">+ Add hardware</button>`;
-  }
-}
 function spendFil(i,g){const m=D.inv.filament[i];if(!m||m.g==null)return;m.g=Math.max(0,m.g-g);D.materialUsed+=g;save();renderAll();}
 function adjustHardware(i,d){const h=D.inv.hardware[i];if(!h)return;h.qty=Math.max(0,(Number(h.qty)||0)+d);save();renderAll();}
 function hardwareRequiredTotal(h){const key=norm(h.name);return D.projects.filter(p=>statusOpen(p.status)).flatMap(p=>p.hardware||[]).filter(r=>(r.invId&&r.invId===h.id)||(!r.invId&&norm(r.name)===key)).reduce((s,r)=>s+(Number(r.qty)||0),0);}
@@ -482,7 +1746,6 @@ function inboxPop(id){const i=(D.inbox||[]).findIndex(x=>x.id===id);if(i<0)retur
 function inboxDelete(id){inboxPop(id);save();renderAll();openInbox();}
 function guessCategory(t){t=(t||'').toLowerCase();if(/(fail|warp|slip|slid|crack|snap|delam|clog|string|peel|lift)/.test(t))return'Failures';if(/(pla|petg|tpu|abs|asa|pva|filament|nozzle|bed temp|°c)/.test(t))return'Materials';if(/(clearance|tolerance|fit|gap|0\.\d|mm)/.test(t))return'Tolerances';if(/(speed|infill|wall|layer|setting|retraction|profile)/.test(t))return'Printer Settings';return'Lessons';}
 function projectOptions(sel){return D.projects.filter(p=>statusOpen(p.status)).map(p=>`<option value="${attr(p.id)}" ${p.id===sel?'selected':''}>${esc(p.name)}</option>`).join('');}
-function filamentOptions(){return D.inv.filament.map(m=>`<option value="${attr(m.id)}">${esc(m.name)} (${m.g==null?'confirm':Math.round(m.g)+'g'})</option>`).join('');}
 
 function triageKnowledge(id){const it=inboxFind(id);if(!it)return;openSheet(`<h3>→ Knowledge</h3><div class="empty" style="margin-bottom:8px">${esc(it.text)}</div><div class="lbl">Category</div><select class="field" id="tk-cat">${['Materials','Printer Settings','Tolerances','Hardware','Workflow','Lessons','Failures','Preferences'].map(c=>`<option ${c===guessCategory(it.text)?'selected':''}>${c}</option>`).join('')}</select><div class="lbl">Title</div><input class="field" id="tk-title" value="${attr(it.text.slice(0,60))}"><div class="lbl">Material (optional)</div><input class="field" id="tk-mat" placeholder="PLA / PETG"><div class="sheet-actions"><button class="btn full" onclick="saveTriageKnowledge('${id}')">Save</button><button class="btn ghost" onclick="openInbox()">Back</button></div>`);}
 function saveTriageKnowledge(id){const it=inboxPop(id);if(!it)return;D.knowledge.push({id:uid('k'),date:mon(),category:document.getElementById('tk-cat').value,title:document.getElementById('tk-title').value.trim()||it.text.slice(0,60),material:document.getElementById('tk-mat').value.trim(),diameter:'',tags:'inbox',body:it.text});save();renderAll();closeSheet();toast('Saved to Knowledge');}
@@ -500,10 +1763,6 @@ function triageTask(id){const it=inboxFind(id);if(!it)return;const open=D.projec
 function saveTriageTask(id){const p=byId(D.projects,document.getElementById('tt-proj').value);if(!p){toast('Pick a project');return;}const it=inboxPop(id);if(!it)return;p.tasks=p.tasks||[];p.tasks.push({id:uid('t'),text:document.getElementById('tt-text').value.trim()||it.text,done:false});save();renderAll();closeSheet();toast('Task added to '+p.name);}
 
 /* ---------- sheets: inventory / hardware ---------- */
-function openSheet(html){document.getElementById('sheet-body').innerHTML=html;document.getElementById('scrim').classList.add('on');document.getElementById('sheet').classList.add('on');}
-function closeSheet(){document.getElementById('scrim').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
-function openInv(i,prefill){const m=i>=0?D.inv.filament[i]:(prefill||{name:'',type:'PLA',c:'#888780',g:1000,spool:1000,cost:null});openSheet(`<h3>${i>=0?'Edit spool':'Add spool'}</h3><div class="lbl">Name</div><input class="field" id="f-name" value="${attr(m.name)}" placeholder="e.g. PLA Matte Teal"><div class="row2"><div style="flex:1"><div class="lbl">Type</div><select class="field" id="f-type">${['PLA','PETG','PVA','TPU','ABS','ASA','Other'].map(t=>`<option ${t===m.type?'selected':''}>${t}</option>`).join('')}</select></div><div style="width:96px"><div class="lbl">Colour</div><input class="field" id="f-color" type="color" value="${attr(m.c||'#888780')}" style="height:44px;padding:4px"></div></div><div class="row2"><div><div class="lbl">Grams remaining</div><input class="field mono" id="f-grams" inputmode="decimal" value="${m.g==null?'':attr(m.g)}" placeholder="blank = confirm later"></div><div><div class="lbl">Spool size g</div><input class="field mono" id="f-spool" inputmode="decimal" value="${attr(m.spool||1000)}"></div></div><div class="lbl">Spool cost $ <span style="text-transform:none;color:var(--dim)">(optional)</span></div><input class="field mono" id="f-cost" inputmode="decimal" value="${m.cost==null?'':attr(m.cost)}" placeholder="e.g. 24.99"><div class="sheet-actions"><button class="btn full" onclick="saveInv(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delInv(${i})">Delete</button>`:''}</div>`);}
-function saveInv(i){const name=document.getElementById('f-name').value.trim();if(!name){toast('Name required');return;}const gv=document.getElementById('f-grams').value.trim();const cv=document.getElementById('f-cost').value.trim();const obj={id:i>=0?D.inv.filament[i].id:uid('f'),name,type:document.getElementById('f-type').value,c:document.getElementById('f-color').value,g:gv===''?null:Math.max(0,parseFloat(gv)||0),spool:parseFloat(document.getElementById('f-spool').value)||1000,cost:cv===''?null:Math.max(0,parseFloat(cv)||0)};if(i>=0)D.inv.filament[i]=obj;else D.inv.filament.push(obj);save();renderAll();closeSheet();toast(i>=0?'Spool updated':'Spool added');}
 function delInv(i){if(!confirm('Delete '+D.inv.filament[i].name+'?'))return;D.inv.filament.splice(i,1);save();renderAll();closeSheet();}
 function openHardware(i){const h=i>=0?D.inv.hardware[i]:{name:'',category:'Fasteners',qty:0,unit:'pcs',min:0,notes:''};openSheet(`<h3>${i>=0?'Edit hardware':'Add hardware'}</h3><div class="lbl">Name</div><input class="field" id="h-name" value="${attr(h.name)}" placeholder="e.g. M3 x 10 socket screws"><div class="row2"><div><div class="lbl">Category</div><select class="field" id="h-cat">${['Fasteners','Bearings','Motion','Electronics','Tools','Consumables','Other'].map(c=>`<option ${c===h.category?'selected':''}>${c}</option>`).join('')}</select></div><div><div class="lbl">Unit</div><input class="field" id="h-unit" value="${attr(h.unit||'pcs')}"></div></div><div class="row2"><div><div class="lbl">Qty on hand</div><input class="field mono" id="h-qty" inputmode="decimal" value="${attr(h.qty||0)}"></div><div><div class="lbl">Min stock</div><input class="field mono" id="h-min" inputmode="decimal" value="${attr(h.min||0)}"></div></div><div class="lbl">Notes</div><textarea class="field" id="h-notes">${esc(h.notes)}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveHardware(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delHardware(${i})">Delete</button>`:''}</div>`);}
 function saveHardware(i){const name=document.getElementById('h-name').value.trim();if(!name){toast('Name required');return;}const obj={id:i>=0?D.inv.hardware[i].id:uid('h'),name,category:document.getElementById('h-cat').value,qty:Math.max(0,parseFloat(document.getElementById('h-qty').value)||0),unit:document.getElementById('h-unit').value.trim()||'pcs',min:Math.max(0,parseFloat(document.getElementById('h-min').value)||0),notes:document.getElementById('h-notes').value.trim()};if(i>=0)D.inv.hardware[i]=obj;else D.inv.hardware.push(obj);save();renderAll();closeSheet();toast('Hardware saved');}
@@ -528,16 +1787,7 @@ function openProject(i){
   openSheet(`<h3>${i>=0?'Edit project':'New project'}</h3><div class="lbl">Name</div><input class="field" id="p-name" value="${attr(b.name)}" placeholder="e.g. Articulating landing gear"><div class="row3"><div><div class="lbl">Type</div><select class="field" id="p-type">${['Mechanical','Tool','Aircraft','Display','RC','General'].map(t=>`<option ${t===b.type?'selected':''}>${t}</option>`).join('')}</select></div><div><div class="lbl">Status</div><select class="field" id="p-status">${['queue','active','done','failed'].map(s=>`<option ${s===b.status?'selected':''}>${s}</option>`).join('')}</select></div><div><div class="lbl">Priority</div><input class="field mono" id="p-priority" inputmode="numeric" value="${attr(b.priority||'')}"></div></div><div class="row2"><div><div class="lbl">Phase</div><input class="field mono" id="p-phase" inputmode="numeric" value="${attr(b.phase||'')}"></div><div><div class="lbl">Est. grams</div><input class="field mono" id="p-est" inputmode="decimal" value="${attr(b.est||'')}"></div></div><div class="lbl">Next action</div><input class="field" id="p-next" value="${attr(b.nextAction||'')}" placeholder="One useful next move"><div class="lbl">Blocking / waiting on</div><input class="field" id="p-block" value="${attr(b.blocking||'')}" placeholder="Hardware, CAD, print test, etc."><div class="lbl">Notes / parameters</div><textarea class="field" id="p-notes" placeholder="Dimensions, module, clearance, design notes…">${esc(b.notes)}</textarea><div class="sheet-actions" style="margin-top:12px"><button class="btn ghost sm" onclick="applyTemplateFromForm()">Auto-fill from type</button></div><div class="lbl">Materials needed</div><div class="edit-list" id="edit-materials"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectMaterial()">+ Add material</button><div class="pick-list" id="edit-material-picker" style="display:none"></div><div class="lbl">Hardware needed</div><div class="edit-list" id="edit-hardware"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectHardware()">+ Add hardware</button><div class="pick-list" id="edit-hardware-picker" style="display:none"></div><div class="lbl">Checklist</div><div class="edit-list" id="edit-tasks"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectTask()">+ Add task</button><div class="lbl">Colour scheme</div><div class="row2"><select class="field" id="p-scheme"><option value="">No scheme</option>${D.schemes.map(s=>`<option value="${attr(s.id)}" ${s.id===b.schemeId?'selected':''}>${esc(s.name)}</option>`).join('')}</select><button class="btn ghost sm" onclick="applySchemeToProject()">Apply</button></div><div class="edit-list" id="edit-colors"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addProjectColor()">+ Add part colour</button><div class="lbl">Knowledge linked</div><div class="edit-list" id="edit-knowledge"></div><button class="btn ghost sm" style="margin-top:8px" onclick="addKnowledgeRef()">+ Link knowledge</button><div class="sheet-actions"><button class="btn full" onclick="saveProject(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delProject(${i})">Delete</button>`:''}</div>`);
   renderProjectEditLists();
 }
-function renderProjectEditLists(){
-  const matEl=document.getElementById('edit-materials');if(matEl)matEl.innerHTML=editMaterials.length?editMaterials.map((m,j)=>`<div class="edit-item"><div class="main"><span class="swatch" style="background:${m.color||'#888780'}"></span> ${esc(m.name)}<div class="sub">${esc(m.type||'')} · ${Math.round(m.grams||0)}g · have ${Math.round(materialHave(m))}g</div></div><span class="x tap" onclick="editMaterials.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No material requirements yet.</div>';
-  const hwEl=document.getElementById('edit-hardware');if(hwEl)hwEl.innerHTML=editHardware.length?editHardware.map((h,j)=>`<div class="edit-item"><div class="main">${esc(h.name)}<div class="sub">Need ${fmtQty(h.qty,h.unit)} · have ${fmtQty(hardwareHave(h),h.unit)}</div></div><span class="x tap" onclick="editHardware.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No hardware requirements yet.</div>';
-  const taskEl=document.getElementById('edit-tasks');if(taskEl)taskEl.innerHTML=editTasks.length?editTasks.map((t,j)=>`<div class="edit-item"><label class="checkline"><input type="checkbox" ${t.done?'checked':''} onchange="editTasks[${j}].done=this.checked"><span>${esc(t.text)}</span></label><span class="x tap" onclick="editTasks.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No tasks yet.</div>';
-  const colEl=document.getElementById('edit-colors');if(colEl)colEl.innerHTML=editColors.length?editColors.map((c,j)=>`<div class="edit-item"><div class="main"><span class="swatch" style="background:${c.hex}"></span> ${esc(c.label||c.hex)}</div><span class="x tap" onclick="editColors.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No custom colours. Scheme colours can still display.</div>';
-  const kEl=document.getElementById('edit-knowledge');if(kEl)kEl.innerHTML=editKnowledgeIds.length?editKnowledgeIds.map((id,j)=>{const k=byId(D.knowledge,id);return `<div class="edit-item"><div class="main">${k?esc(k.title):'Missing knowledge'}<div class="sub">${k?esc(k.category):''}</div></div><span class="x tap" onclick="editKnowledgeIds.splice(${j},1);renderProjectEditLists()">×</span></div>`;}).join(''):'<div class="empty">No knowledge linked yet.</div>';
-}
 function applyTemplateFromForm(){const type=document.getElementById('p-type').value;const t=projectTemplate(type);mergeReq(editMaterials,t.materials);mergeReq(editHardware,t.hardware);mergeReq(editTasks,t.tasks);if(t.schemeId){document.getElementById('p-scheme').value=t.schemeId;if(!editColors.length){const s=byId(D.schemes,t.schemeId);if(s)editColors=JSON.parse(JSON.stringify(s.colors||[]));}}renderProjectEditLists();toast('Template applied');}
-function addProjectMaterial(){const list=D.inv.filament.map((m,i)=>`${i+1}. ${m.name} (${m.g==null?'confirm':Math.round(m.g)+'g'})`).join('\n');const choice=prompt('Inventory number or custom material name:\n'+list,'');if(!choice)return;let f=null;if(/^\d+$/.test(choice.trim()))f=D.inv.filament[parseInt(choice,10)-1];const grams=parseFloat(prompt('Estimated grams needed:','100'));if(isNaN(grams))return;editMaterials.push(f?{id:uid('m'),invId:f.id,name:f.name,type:f.type,color:f.c,grams}:{id:uid('m'),invId:'',name:choice.trim(),type:'PLA',color:'#888780',grams});renderProjectEditLists();}
-function addProjectHardware(){const list=D.inv.hardware.map((h,i)=>`${i+1}. ${h.name} (${fmtQty(h.qty,h.unit)} on hand)`).join('\n');const choice=prompt('Hardware number or custom item:\n'+list,'');if(!choice)return;let h=null;if(/^\d+$/.test(choice.trim()))h=D.inv.hardware[parseInt(choice,10)-1];const qty=parseFloat(prompt('Quantity needed:','1'));if(isNaN(qty))return;editHardware.push(h?{id:uid('r'),invId:h.id,name:h.name,qty,unit:h.unit||'pcs'}:{id:uid('r'),invId:'',name:choice.trim(),qty,unit:'pcs'});renderProjectEditLists();}
 function addProjectTask(){const text=prompt('Task / milestone:','');if(!text)return;editTasks.push({id:uid('t'),text,done:false});renderProjectEditLists();}
 function addProjectColor(){const label=prompt('Part + colour label (e.g. PLA Orange drive gear):','');if(!label)return;const hex=prompt('Hex colour:','#E0652F')||'#E0652F';editColors.push({hex,label});renderProjectEditLists();}
 function applySchemeToProject(){const id=document.getElementById('p-scheme').value;const s=byId(D.schemes,id);if(!s)return;editColors=JSON.parse(JSON.stringify(s.colors||[]));renderProjectEditLists();toast('Scheme applied');}
@@ -581,18 +1831,13 @@ function renderQuick(){
   document.getElementById('quick-sub').textContent=`${arr.length}/${(D.quickPrints||[]).length} shown`;
   el.innerHTML=arr.length?arr.map(q=>quickCard(q)).join(''):'<div class="card empty">No quick prints yet. This is where whim prints/material tests live unless you attach or convert them.</div>';
 }
-function quickCard(q){const f=q.filamentId?findFil(q.filamentId):null;const p=q.projectId?byId(D.projects,q.projectId):null;return `<div class="card qp-card"><div class="b-top"><div><div class="qp-title">${esc(q.name)}</div><div class="qp-meta">${esc(q.kind)} · ${esc(q.date||'')} · ${q.result?esc(q.result):'No result'}${p?' · '+esc(p.name):''}</div></div><span class="badge ${q.result==='Failed'?'failed':'done'}">${esc(q.result||'Saved')}</span></div><div class="b-mats">${f?`<span class="pill">${swatchHTML(f)}${esc(f.name)}</span>`:''}${q.orientation?`<span class="pill">${esc(q.orientation)}</span>`:''}${q.supportIssue?`<span class="pill ${q.supportIssue==='None'?'green':'red'}">${esc(q.supportIssue)}</span>`:''}</div>${q.notes?`<div class="qp-note">${esc(q.notes)}</div>`:''}<div class="b-actions"><button class="act" onclick="openQuickPrintById('${q.id}')">Edit</button>${!q.projectId?`<button class="act" onclick="attachQuickSheet('${q.id}')">Attach</button><button class="act" onclick="convertQuickToProject('${q.id}')">Convert</button>`:''}</div></div>`;}
 function openQuickPrintById(id){const i=(D.quickPrints||[]).findIndex(q=>q.id===id);if(i>=0)openQuickPrint(i);}
-function openQuickPrint(i){const q=i>=0?D.quickPrints[i]:{name:'',kind:'Whim',date:day(),filamentId:D.inv.filament[0]?.id||'',grams:'',projectId:'',iteration:'',orientation:'Flat',supportType:'None',supportBase:'Model material',supportInterface:'None',supportIssue:'None',result:'Saved',failure:'',notes:''};openSheet(`<h3>${i>=0?'Edit quick print':'Save quick print'}</h3><div class="lbl">Name</div><input class="field" id="q-name" value="${attr(q.name)}" placeholder="e.g. Transparent PETG frame test"><div class="row2"><div><div class="lbl">Type</div><select class="field" id="q-kind">${['Whim','Material Test','Project Attempt'].map(x=>`<option ${x===q.kind?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Result</div><select class="field" id="q-result">${['Saved','Success','Failed','Mixed'].map(x=>`<option ${x===q.result?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Filament</div><select class="field" id="q-fil">${D.inv.filament.map(f=>`<option value="${attr(f.id)}" ${f.id===q.filamentId?'selected':''}>${esc((f.brand?f.brand+' ':'')+f.name)} (${f.g==null?'confirm':Math.round(f.g)+'g'})</option>`).join('')}</select><div class="row2"><div><div class="lbl">Grams used</div><input class="field mono" id="q-grams" inputmode="decimal" value="${attr(q.grams||'')}" placeholder="e.g. 63"></div><div><div class="lbl">Project optional</div><select class="field" id="q-proj"><option value="">Standalone</option>${D.projects.map(p=>`<option value="${attr(p.id)}" ${p.id===q.projectId?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Orientation</div><select class="field" id="q-orient">${['Flat','Upright','Angled','Face up','Face down','Split model','Custom'].map(x=>`<option ${x===q.orientation?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support type</div><select class="field" id="q-support">${['None','Tree/Organic','Normal','Hybrid','Painted/Manual'].map(x=>`<option ${x===q.supportType?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Support base</div><select class="field" id="q-sbase">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportBase?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support interface</div><select class="field" id="q-sint">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportInterface?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Support / orientation outcome</div><select class="field" id="q-sissue">${['None','Supports clean','Supports hard but removable','Supports trapped','Damaged surface','Damaged function','Warping/lift','Wobble/knocked loose'].map(x=>`<option ${x===q.supportIssue?'selected':''}>${x}</option>`).join('')}</select><div class="lbl">Failure / issue</div><input class="field" id="q-failure" value="${attr(q.failure||'')}" placeholder="e.g. supports trapped in groove"><div class="lbl">Notes / what happened</div><textarea class="field" id="q-notes">${esc(q.notes||'')}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveQuickPrint(${i})">Save print</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="deleteQuickPrint(${i})">Delete</button>`:''}</div>`);}
-function saveQuickPrint(i){const old=i>=0?D.quickPrints[i]:null;const obj={id:old?old.id:uid('q'),name:document.getElementById('q-name').value.trim()||'Quick print',kind:document.getElementById('q-kind').value,date:old?old.date:day(),filamentId:document.getElementById('q-fil').value,grams:parseFloat(document.getElementById('q-grams').value)||0,projectId:document.getElementById('q-proj').value,orientation:document.getElementById('q-orient').value,supportType:document.getElementById('q-support').value,supportBase:document.getElementById('q-sbase').value,supportInterface:document.getElementById('q-sint').value,supportIssue:document.getElementById('q-sissue').value,result:document.getElementById('q-result').value,failure:document.getElementById('q-failure').value.trim(),notes:document.getElementById('q-notes').value.trim()};if(i>=0)D.quickPrints[i]=obj;else D.quickPrints.push(obj);applyQuickPrintEffects(obj,old);generateSuggestionsFromQuick(obj);save();renderAll();closeSheet();toast('Quick print saved');}
-function applyQuickPrintEffects(q,old){const f=q.filamentId?findFil(q.filamentId):null;if(f){f.tests=f.tests||[];if(!old){f.tests.push({id:q.id,date:q.date,kind:q.kind,result:q.result,orientation:q.orientation,supportIssue:q.supportIssue,notes:q.notes,grams:q.grams});if(f.g!=null&&q.grams)f.g=Math.max(0,Number(f.g)-Number(q.grams));D.materialUsed+=(Number(q.grams)||0);} } if(q.projectId){const p=byId(D.projects,q.projectId);if(p){p.attempts=p.attempts||[];if(!p.attempts.some(a=>a.quickId===q.id))p.attempts.push({id:uid('pa'),quickId:q.id,date:q.date,result:q.result,orientation:q.orientation,filamentId:q.filamentId,notes:q.notes});}}}
 function generateSuggestionsFromQuick(q){D.suggestions=D.suggestions||[];const add=(title,category,body)=>{if(!D.suggestions.some(s=>s.sourceId===q.id&&s.title===title))D.suggestions.push({id:uid('sg'),date:day(),title,category,body,source:'Quick Print: '+q.name,sourceId:q.id,status:'pending'});};const f=q.filamentId?findFil(q.filamentId):null;if(q.result==='Failed'||q.supportIssue!=='None'){if(/trap/i.test(q.supportIssue+' '+q.failure))add('Avoid trapped supports in functional/internal geometry','Orientation',`Print "${q.name}" failed because supports were trapped. For similar geometry, reorient, use support blockers, split the model, or use full dissolvable support if the scaffold cannot be physically removed.`);if(q.orientation&&q.supportIssue&&q.supportIssue!=='None')add(`${q.orientation} orientation caused: ${q.supportIssue}`,'Orientation',`On "${q.name}", orientation was ${q.orientation}, support type was ${q.supportType}, support base was ${q.supportBase}, interface was ${q.supportInterface}, and outcome was ${q.supportIssue}. ${q.failure||q.notes||''}`);}if(q.kind==='Material Test'&&f)add(`${f.brand?f.brand+' ':''}${f.name} material test result: ${q.result}`,'Materials',`Material test on ${f.name}. Result: ${q.result}. Orientation: ${q.orientation}. Supports: ${q.supportType}. Issue: ${q.supportIssue}. Notes: ${q.notes||q.failure||''}`);if(q.supportInterface==='PVA')add('PVA support interface used','Supports',`Print "${q.name}" used support base ${q.supportBase} with PVA interface. Outcome: ${q.supportIssue}. Notes: ${q.notes||q.failure||''}`);}
 function approveSuggestion(id){const s=byId(D.suggestions,id);if(!s)return;D.knowledge.push({id:uid('k'),date:mon(),category:s.category||'Lessons',title:s.title,material:'',diameter:'',tags:'suggested,'+(s.source||''),body:s.body});s.status='saved';save();renderAll();toast('Knowledge saved');}
 function ignoreSuggestion(id){const s=byId(D.suggestions,id);if(!s)return;s.status='ignored';save();renderAll();toast('Suggestion ignored');}
 function deleteQuickPrint(i){if(!confirm('Delete this quick print?'))return;D.quickPrints.splice(i,1);save();renderAll();closeSheet();}
 function attachQuickSheet(id){const q=byId(D.quickPrints,id);if(!q)return;openSheet(`<h3>Attach quick print</h3><div class="b-meta">${esc(q.name)}</div><div class="lbl">Project</div><select class="field" id="aq-proj">${D.projects.map(p=>`<option value="${attr(p.id)}">${esc(p.name)}</option>`).join('')}</select><div class="sheet-actions"><button class="btn full" onclick="attachQuickToProject('${id}')">Attach as attempt</button><button class="btn ghost" onclick="closeSheet()">Cancel</button></div>`);}
 function attachQuickToProject(id){const q=byId(D.quickPrints,id);const p=byId(D.projects,document.getElementById('aq-proj').value);if(!q||!p)return;q.projectId=p.id;p.attempts=p.attempts||[];p.attempts.push({id:uid('pa'),quickId:q.id,date:q.date,result:q.result,orientation:q.orientation,filamentId:q.filamentId,notes:q.notes});save();renderAll();closeSheet();toast('Attached to project');}
-function convertQuickToProject(id){const q=byId(D.quickPrints,id);if(!q)return;const p={id:uid('b'),name:q.name,type:'General',status:q.result==='Failed'?'failed':'done',priority:D.projects.length+1,phase:1,started:q.date,doneDate:q.date,nextAction:'',blocking:'',notes:q.notes||q.failure||'',est:0,used:q.grams||0,schemeId:'',colors:[],materials:q.filamentId?[{id:uid('m'),invId:q.filamentId,name:findFil(q.filamentId)?.name||'Material',type:findFil(q.filamentId)?.type||'',color:findFil(q.filamentId)?.c||'#888780',grams:q.grams||0}]:[],hardware:[],tasks:[],knowledgeIds:[],iterations:[],attempts:[{id:uid('pa'),quickId:q.id,date:q.date,result:q.result,orientation:q.orientation,filamentId:q.filamentId,notes:q.notes}]};D.projects.push(p);q.projectId=p.id;save();renderAll();toast('Converted to project');}
 
 function renderProjectEditLists(){
   const matEl=document.getElementById('edit-materials');if(matEl)matEl.innerHTML=editMaterials.length?editMaterials.map((m,j)=>`<div class="edit-item"><div class="main">${swatchHTML({color:m.color,transparent:m.transparent,name:m.name})} ${esc(m.name)}<div class="sub">${esc(m.type||'')} · ${Math.round(m.grams||0)}g · have ${Math.round(materialHave(m))}g</div></div><button class="btn mini ghost" onclick="editReqMaterial(${j})">Edit</button><span class="x tap" onclick="editMaterials.splice(${j},1);renderProjectEditLists()">×</span></div>`).join(''):'<div class="empty">No material requirements yet.</div>';
@@ -607,8 +1852,6 @@ function editReqMaterial(j){const g=parseFloat(prompt('Estimated grams:',editMat
 function addProjectHardware(){const box=document.getElementById('edit-hardware-picker');if(!box)return;box.style.display=box.style.display==='none'?'flex':'none';box.innerHTML=D.inv.hardware.map(h=>`<div class="pick" onclick="pickProjectHardware('${attr(h.id)}')"><div><div>${esc(h.name)}</div><div class="meta">${esc(h.category||'Hardware')} · have ${fmtQty(h.qty,h.unit)}</div></div></div>`).join('');}
 function pickProjectHardware(id){const h=findHw(id);if(!h)return;editHardware.push({id:uid('r'),invId:h.id,name:h.name,qty:1,unit:h.unit||'pcs'});const box=document.getElementById('edit-hardware-picker');if(box)box.style.display='none';renderProjectEditLists();toast('Hardware added at qty 1 — edit if needed');}
 function editReqHardware(j){const q=parseFloat(prompt('Quantity needed:',editHardware[j].qty||1));if(isNaN(q))return;editHardware[j].qty=q;renderProjectEditLists();}
-function openInv(i,prefill){const m=i>=0?D.inv.filament[i]:(prefill||{name:'',brand:'',type:'PLA',c:'#888780',transparent:false,g:1000,spool:1000,cost:null,best:{},tests:[]});openSheet(`<h3>${i>=0?'Edit spool':'Add spool'}</h3><div class="lbl">Brand</div><input class="field" id="f-brand" value="${attr(m.brand||'')}" placeholder="Bambu / Elegoo / Polymaker"><div class="lbl">Name</div><input class="field" id="f-name" value="${attr(m.name)}" placeholder="e.g. PLA Matte Teal"><div class="row2"><div style="flex:1"><div class="lbl">Type</div><select class="field" id="f-type">${['PLA','PETG','PVA','TPU','ABS','ASA','Other'].map(t=>`<option ${t===m.type?'selected':''}>${t}</option>`).join('')}</select></div><div style="width:96px"><div class="lbl">Colour</div><input class="field" id="f-color" type="color" value="${attr(m.c||'#888780')}" style="height:44px;padding:4px"></div></div><label class="checkline" style="margin-top:12px"><input type="checkbox" id="f-trans" ${m.transparent?'checked':''}><span>Transparent / clear filament</span></label><div class="row2"><div><div class="lbl">Grams remaining</div><input class="field mono" id="f-grams" inputmode="decimal" value="${m.g==null?'':attr(m.g)}" placeholder="blank = confirm later"></div><div><div class="lbl">Spool size g</div><input class="field mono" id="f-spool" inputmode="decimal" value="${attr(m.spool||1000)}"></div></div><div class="row2"><div><div class="lbl">Best nozzle °C</div><input class="field mono" id="f-noz" value="${attr((m.best&&m.best.nozzle)||'')}" placeholder="245"></div><div><div class="lbl">Best bed °C</div><input class="field mono" id="f-bed" value="${attr((m.best&&m.best.bed)||'')}" placeholder="75"></div></div><div class="lbl">Spool cost $ <span style="text-transform:none;color:var(--dim)">(optional)</span></div><input class="field mono" id="f-cost" inputmode="decimal" value="${m.cost==null?'':attr(m.cost)}" placeholder="e.g. 24.99"><div class="empty" style="margin-top:8px">Tests logged from Quick Print / Material Test: ${(m.tests||[]).length}</div><div class="sheet-actions"><button class="btn full" onclick="saveInv(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delInv(${i})">Delete</button>`:''}</div>`);}
-function saveInv(i){const name=document.getElementById('f-name').value.trim();if(!name){toast('Name required');return;}const gv=document.getElementById('f-grams').value.trim();const cv=document.getElementById('f-cost').value.trim();const old=i>=0?D.inv.filament[i]:null;const obj={id:old?old.id:uid('f'),brand:document.getElementById('f-brand').value.trim(),name,type:document.getElementById('f-type').value,c:document.getElementById('f-color').value,transparent:document.getElementById('f-trans').checked,g:gv===''?null:Math.max(0,parseFloat(gv)||0),spool:parseFloat(document.getElementById('f-spool').value)||1000,cost:cv===''?null:Math.max(0,parseFloat(cv)||0),best:{nozzle:document.getElementById('f-noz').value.trim(),bed:document.getElementById('f-bed').value.trim()},tests:old?(old.tests||[]):[]};if(i>=0)D.inv.filament[i]=obj;else D.inv.filament.push(obj);save();renderAll();closeSheet();toast(i>=0?'Spool updated':'Spool added');}
 
 /* ---------- reports / digest / backups ---------- */
 function buildMarkdown(){
@@ -746,7 +1989,6 @@ function filamentOptions(){return D.inv.filament.map(m=>`<option value="${attr(m
 function quickFilamentSelectedHTML(id){const f=findFil(id)||D.inv.filament[0];if(!f)return '<div class="pick"><div>No filament</div></div>';return `<div class="pick" onclick="openQuickFilamentPicker()">${swatchHTML(f)}<div><div>${esc(filamentName(f,true))}</div><div class="meta">Tap to change${filamentStockNote(f)?' · '+esc(filamentStockNote(f)):''}</div></div></div>`;}
 function openQuickFilamentPicker(){const box=document.getElementById('q-fil-picker');if(!box)return;box.style.display=box.style.display==='none'?'flex':'none';box.innerHTML=D.inv.filament.map(f=>`<div class="pick" onclick="chooseQuickFilament('${attr(f.id)}')">${swatchHTML(f)}<div><div>${esc(filamentName(f,true))}</div><div class="meta">${esc(f.type||'')}${f.transparent?' · transparent':''}${filamentStockNote(f)?' · '+esc(filamentStockNote(f)):''}</div></div></div>`).join('');}
 function chooseQuickFilament(id){document.getElementById('q-fil').value=id;document.getElementById('q-fil-selected').innerHTML=quickFilamentSelectedHTML(id);const box=document.getElementById('q-fil-picker');if(box)box.style.display='none';}
-function openQuickPrint(i){const q=i>=0?D.quickPrints[i]:{name:'',kind:'Whim',date:day(),filamentId:D.inv.filament[0]?.id||'',grams:'',projectId:'',iteration:'',orientation:'Flat',supportType:'None',supportBase:'Model material',supportInterface:'None',supportIssue:'None',result:'Saved',failure:'',notes:''};openSheet(`<h3>${i>=0?'Edit quick print':'Save quick print'}</h3><div class="lbl">Title</div><input class="field" id="q-name" value="${attr(q.name)}" placeholder="e.g. Transparent PETG frame test"><div class="row2"><div><div class="lbl">Type</div><select class="field" id="q-kind">${['Whim','Material Test','Project Attempt'].map(x=>`<option ${x===q.kind?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Result</div><select class="field" id="q-result">${['Saved','Success','Failed','Mixed'].map(x=>`<option ${x===q.result?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Filament</div><input type="hidden" id="q-fil" value="${attr(q.filamentId)}"><div id="q-fil-selected">${quickFilamentSelectedHTML(q.filamentId)}</div><div class="pick-list" id="q-fil-picker" style="display:none"></div><div class="row2"><div><div class="lbl">Grams used</div><input class="field mono" id="q-grams" inputmode="decimal" value="${attr(q.grams||'')}" placeholder="e.g. 63"></div><div><div class="lbl">Project optional</div><select class="field" id="q-proj"><option value="">Standalone</option>${D.projects.map(p=>`<option value="${attr(p.id)}" ${p.id===q.projectId?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Orientation</div><select class="field" id="q-orient">${['Flat','Upright','Angled','Face up','Face down','Split model','Custom'].map(x=>`<option ${x===q.orientation?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support type</div><select class="field" id="q-support">${['None','Tree/Organic','Normal','Hybrid','Painted/Manual'].map(x=>`<option ${x===q.supportType?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Support base</div><select class="field" id="q-sbase">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportBase?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support interface</div><select class="field" id="q-sint">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportInterface?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Support / orientation outcome</div><select class="field" id="q-sissue">${['None','Supports clean','Supports hard but removable','Supports trapped','Damaged surface','Damaged function','Warping/lift','Wobble/knocked loose'].map(x=>`<option ${x===q.supportIssue?'selected':''}>${x}</option>`).join('')}</select><div class="lbl">Failure / issue</div><input class="field" id="q-failure" value="${attr(q.failure||'')}" placeholder="e.g. supports trapped in groove"><div class="lbl">Notes / what happened</div><textarea class="field" id="q-notes">${esc(q.notes||'')}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveQuickPrint(${i})">Save print</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="deleteQuickPrint(${i})">Delete</button>`:''}</div>`);}
 function renderInv(){
   document.getElementById('inv-fil-btn').classList.toggle('on',invMode==='filament');document.getElementById('inv-hw-btn').classList.toggle('on',invMode==='hardware');
   const el=document.getElementById('inv-list');
@@ -762,7 +2004,7 @@ function renderInv(){
 
 
 /* ---------- v5.2 HOTFIX: iPhone sheet scroll reset + Quick Print title/project controls ---------- */
-const APP_BUILD='v5.3 persistence hotfix';
+const APP_BUILD='v5.4 clean + embedded seed';
 function openSheet(html){
   const sheet=document.getElementById('sheet');
   const body=document.getElementById('sheet-body');
@@ -784,7 +2026,7 @@ function renderStats(){
   const active=D.projects.filter(p=>p.status==='active').length;
   const auto=getAutoNeeds().filter(x=>x.buy>0).length;
   const low=lowInventory().length;
-  document.getElementById('updated').textContent=D.updated?APP_BUILD+' · Updated '+new Date(D.updated).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):APP_BUILD+' · Not yet updated';
+  const _cnt=`${D.projects.length}p · ${(D.quickPrints||[]).length}q · ${D.inv.filament.length}f · ${D.knowledge.length}k`;document.getElementById('updated').textContent=APP_BUILD+(D.updated?' · '+new Date(D.updated).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'')+' · '+_cnt;
   document.getElementById('stats').innerHTML=stt(active,'Active')+stt(open,'Open')+stt(auto,'To buy')+stt(low,'Low stock')+stt((D.inbox||[]).length,'Inbox')+stt(Math.round(D.materialUsed)+'g','Used');
 }
 function quickProjectName(id){const p=id?byId(D.projects,id):null;return p?p.name:'';}
@@ -896,14 +2138,15 @@ function mergeStoredData(items){
 function normalizeDataOn(obj){
   const oldD=D;D=obj;normalizeData();obj=D;D=oldD;return obj;
 }
+function seedOrFresh(){try{if(typeof SEED_DATA!=='undefined'&&SEED_DATA&&Array.isArray(SEED_DATA.projects)){return migrateOld(JSON.parse(JSON.stringify(SEED_DATA)));}}catch(e){}return freshData();}
 function load(){
   try{
     const keys=[KEY,...OLDKEYS];
     const items=[];
     keys.forEach(k=>{const x=parseStored(k);if(x)items.push(x);});
     if(items.length){D=mergeStoredData(items);normalizeData();save(true);return;}
-    D=freshData();normalizeData();save(true);
-  }catch(e){D=freshData();normalizeData();save(true);}
+    D=seedOrFresh();normalizeData();save(true);
+  }catch(e){D=seedOrFresh();normalizeData();save(true);}
 }
 function save(silent){
   D.updated=new Date().toISOString();
@@ -916,6 +2159,7 @@ function save(silent){
 }
 
 load();renderAll();go('dash');
+
 </script>
 </body>
 </html>
