@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Print Lab">
 <meta name="theme-color" content="#16161A">
-<title>Print Lab v5 — Project System</title>
+<title>Print Lab v5.1 — Project System</title>
 <style>
 :root{
   --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--surface3:#303039;--line:#34343C;
@@ -88,7 +88,6 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
     <div id="projects-list"></div>
   </section>
 
-
   <section class="view" id="v-quick">
     <div class="view-h">Quick Prints <span class="sub" id="quick-sub"></span></div>
     <button class="add-build" onclick="openQuickPrint(-1)">+ Save quick / whim print</button>
@@ -155,9 +154,9 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
   <button class="tab" data-v="dash" onclick="go('dash')"><svg viewBox="0 0 24 24"><path d="M4 13h7V4H4zM13 20h7V4h-7zM4 20h7v-5H4z"/></svg>Dash</button>
   <button class="tab" data-v="inv" onclick="go('inv')"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>Inventory</button>
   <button class="tab" data-v="projects" onclick="go('projects')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2.5M12 17.5V20M4 12h2.5M17.5 12H20M6.3 6.3l1.8 1.8M15.9 15.9l1.8 1.8M17.7 6.3l-1.8 1.8M8.1 15.9l-1.8 1.8"/></svg>Projects</button>
+  <button class="tab" data-v="quick" onclick="go('quick')"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M17 16l3 3M20 16l-3 3"/></svg>Quick</button>
   <button class="tab" data-v="knowledge" onclick="go('knowledge')"><svg viewBox="0 0 24 24"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M8 8h8M8 12h6"/></svg>Knowledge</button>
   <button class="tab" data-v="proc" onclick="go('proc')"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H3M9 20a1 1 0 100-2 1 1 0 000 2zM17 20a1 1 0 100-2 1 1 0 000 2z"/></svg>Buy</button>
-  <button class="tab" data-v="quick" onclick="go('quick')"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M17 16l3 3M20 16l-3 3"/></svg>Quick</button>
 </nav>
 
 <div class="scrim" id="scrim" onclick="closeSheet()"></div>
@@ -165,8 +164,8 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY='printlab_app_v5';
-const OLDKEYS=['printlab_app_v4','printlab_app_v3','printlab_app_v2'];
+const KEY='printlab_app_v51';
+const OLDKEYS=['printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2'];
 let D;
 let invMode='filament';
 let projectFilter='open';
@@ -608,8 +607,6 @@ function editReqMaterial(j){const g=parseFloat(prompt('Estimated grams:',editMat
 function addProjectHardware(){const box=document.getElementById('edit-hardware-picker');if(!box)return;box.style.display=box.style.display==='none'?'flex':'none';box.innerHTML=D.inv.hardware.map(h=>`<div class="pick" onclick="pickProjectHardware('${attr(h.id)}')"><div><div>${esc(h.name)}</div><div class="meta">${esc(h.category||'Hardware')} · have ${fmtQty(h.qty,h.unit)}</div></div></div>`).join('');}
 function pickProjectHardware(id){const h=findHw(id);if(!h)return;editHardware.push({id:uid('r'),invId:h.id,name:h.name,qty:1,unit:h.unit||'pcs'});const box=document.getElementById('edit-hardware-picker');if(box)box.style.display='none';renderProjectEditLists();toast('Hardware added at qty 1 — edit if needed');}
 function editReqHardware(j){const q=parseFloat(prompt('Quantity needed:',editHardware[j].qty||1));if(isNaN(q))return;editHardware[j].qty=q;renderProjectEditLists();}
-
-
 function openInv(i,prefill){const m=i>=0?D.inv.filament[i]:(prefill||{name:'',brand:'',type:'PLA',c:'#888780',transparent:false,g:1000,spool:1000,cost:null,best:{},tests:[]});openSheet(`<h3>${i>=0?'Edit spool':'Add spool'}</h3><div class="lbl">Brand</div><input class="field" id="f-brand" value="${attr(m.brand||'')}" placeholder="Bambu / Elegoo / Polymaker"><div class="lbl">Name</div><input class="field" id="f-name" value="${attr(m.name)}" placeholder="e.g. PLA Matte Teal"><div class="row2"><div style="flex:1"><div class="lbl">Type</div><select class="field" id="f-type">${['PLA','PETG','PVA','TPU','ABS','ASA','Other'].map(t=>`<option ${t===m.type?'selected':''}>${t}</option>`).join('')}</select></div><div style="width:96px"><div class="lbl">Colour</div><input class="field" id="f-color" type="color" value="${attr(m.c||'#888780')}" style="height:44px;padding:4px"></div></div><label class="checkline" style="margin-top:12px"><input type="checkbox" id="f-trans" ${m.transparent?'checked':''}><span>Transparent / clear filament</span></label><div class="row2"><div><div class="lbl">Grams remaining</div><input class="field mono" id="f-grams" inputmode="decimal" value="${m.g==null?'':attr(m.g)}" placeholder="blank = confirm later"></div><div><div class="lbl">Spool size g</div><input class="field mono" id="f-spool" inputmode="decimal" value="${attr(m.spool||1000)}"></div></div><div class="row2"><div><div class="lbl">Best nozzle °C</div><input class="field mono" id="f-noz" value="${attr((m.best&&m.best.nozzle)||'')}" placeholder="245"></div><div><div class="lbl">Best bed °C</div><input class="field mono" id="f-bed" value="${attr((m.best&&m.best.bed)||'')}" placeholder="75"></div></div><div class="lbl">Spool cost $ <span style="text-transform:none;color:var(--dim)">(optional)</span></div><input class="field mono" id="f-cost" inputmode="decimal" value="${m.cost==null?'':attr(m.cost)}" placeholder="e.g. 24.99"><div class="empty" style="margin-top:8px">Tests logged from Quick Print / Material Test: ${(m.tests||[]).length}</div><div class="sheet-actions"><button class="btn full" onclick="saveInv(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delInv(${i})">Delete</button>`:''}</div>`);}
 function saveInv(i){const name=document.getElementById('f-name').value.trim();if(!name){toast('Name required');return;}const gv=document.getElementById('f-grams').value.trim();const cv=document.getElementById('f-cost').value.trim();const old=i>=0?D.inv.filament[i]:null;const obj={id:old?old.id:uid('f'),brand:document.getElementById('f-brand').value.trim(),name,type:document.getElementById('f-type').value,c:document.getElementById('f-color').value,transparent:document.getElementById('f-trans').checked,g:gv===''?null:Math.max(0,parseFloat(gv)||0),spool:parseFloat(document.getElementById('f-spool').value)||1000,cost:cv===''?null:Math.max(0,parseFloat(cv)||0),best:{nozzle:document.getElementById('f-noz').value.trim(),bed:document.getElementById('f-bed').value.trim()},tests:old?(old.tests||[]):[]};if(i>=0)D.inv.filament[i]=obj;else D.inv.filament.push(obj);save();renderAll();closeSheet();toast(i>=0?'Spool updated':'Spool added');}
 
@@ -700,6 +697,67 @@ function savePDF(){
   w.document.close();setTimeout(()=>w.print(),350);toast('Share sheet → Save as PDF');
 }
 function resetData(){if(!confirm('Reset all app data to v4 starter data? Download a backup first if you want to keep anything.'))return;D=freshData();save();renderAll();toast('Reset complete');}
+
+
+/* ---------- v5.1: generated filament names + cleaner material picker ---------- */
+function filamentVariant(f){
+  if(!f)return '';
+  if(f.variant)return f.variant;
+  let n=(f.name||'').trim();
+  const b=(f.brand||'').trim();
+  const t=(f.type||'').trim();
+  if(b&&norm(n).startsWith(norm(b)+' '))n=n.slice(b.length).trim();
+  if(t&&norm(n).startsWith(norm(t)+' '))n=n.slice(t.length).trim();
+  if(!n&&f.transparent)n='Clear';
+  return n||'';
+}
+function filamentName(f,withBrand=true){
+  if(!f)return 'Material';
+  const b=(f.brand||'').trim();
+  const t=(f.type||'').trim()||'Filament';
+  let v=filamentVariant(f).trim();
+  if(!v&&f.transparent)v='Clear';
+  return [withBrand?b:'',t,v].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
+function filamentStockNote(f){
+  if(!f)return '';
+  if(f.g==null)return 'confirm stock';
+  if(Number(f.g)<250)return 'low '+Math.round(Number(f.g))+'g';
+  return '';
+}
+function filamentPickerText(f){const note=filamentStockNote(f);return `${filamentName(f,true)}${note?' · '+note:''}`;}
+function updateFilamentPreview(){const prev=document.getElementById('f-preview');if(!prev)return;const f={brand:document.getElementById('f-brand')?.value||'',type:document.getElementById('f-type')?.value||'',variant:document.getElementById('f-variant')?.value||'',transparent:document.getElementById('f-trans')?.checked};prev.textContent=filamentName(f,true)||'—';}
+function openInv(i,prefill){
+  const m=i>=0?D.inv.filament[i]:(prefill||{brand:'',name:'',type:'PLA',variant:'',c:'#888780',transparent:false,g:1000,spool:1000,cost:null,best:{},tests:[]});
+  const variant=filamentVariant(m);
+  openSheet(`<h3>${i>=0?'Edit spool':'Add spool'}</h3><div class="lbl">Brand</div><input class="field" id="f-brand" value="${attr(m.brand||'')}" placeholder="Bambu / Elegoo / Polymaker" oninput="updateFilamentPreview()"><div class="row2"><div><div class="lbl">Type</div><select class="field" id="f-type" onchange="updateFilamentPreview()">${['PLA','PETG','PVA','TPU','ABS','ASA','Other'].map(t=>`<option ${t===m.type?'selected':''}>${t}</option>`).join('')}</select></div><div><div class="lbl">Colour / finish</div><input class="field" id="f-variant" value="${attr(variant)}" placeholder="Matte White / Navy Blue / Clear" oninput="updateFilamentPreview()"></div></div><div class="row2"><div style="flex:1"><div class="lbl">Generated name</div><div class="card tight" style="margin-bottom:0"><div class="hw-name" id="f-preview">${esc(filamentName({...m,variant},true))}</div><div class="hw-meta">Auto-built from brand + type + colour/finish</div></div></div><div style="width:96px"><div class="lbl">Colour</div><input class="field" id="f-color" type="color" value="${attr(m.c||'#888780')}" style="height:58px;padding:4px"></div></div><label class="checkline" style="margin-top:12px"><input type="checkbox" id="f-trans" ${m.transparent?'checked':''} onchange="updateFilamentPreview()"><span>Transparent / clear filament</span></label><div class="row2"><div><div class="lbl">Grams remaining</div><input class="field mono" id="f-grams" inputmode="decimal" value="${m.g==null?'':attr(m.g)}" placeholder="blank = confirm later"></div><div><div class="lbl">Spool size g</div><input class="field mono" id="f-spool" inputmode="decimal" value="${attr(m.spool||1000)}"></div></div><div class="row2"><div><div class="lbl">Best nozzle °C</div><input class="field mono" id="f-noz" value="${attr((m.best&&m.best.nozzle)||'')}" placeholder="245"></div><div><div class="lbl">Best bed °C</div><input class="field mono" id="f-bed" value="${attr((m.best&&m.best.bed)||'')}" placeholder="75"></div></div><div class="lbl">Spool cost $ <span style="text-transform:none;color:var(--dim)">(optional)</span></div><input class="field mono" id="f-cost" inputmode="decimal" value="${m.cost==null?'':attr(m.cost)}" placeholder="e.g. 24.99"><div class="empty" style="margin-top:8px">Tests logged from Quick Print / Material Test: ${(m.tests||[]).length}</div><div class="sheet-actions"><button class="btn full" onclick="saveInv(${i})">Save</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="delInv(${i})">Delete</button>`:''}</div>`);
+}
+function saveInv(i){
+  const brand=document.getElementById('f-brand').value.trim();
+  const type=document.getElementById('f-type').value;
+  const variant=document.getElementById('f-variant').value.trim();
+  if(!type){toast('Type required');return;}
+  if(!variant){toast('Add colour / finish');return;}
+  const gv=document.getElementById('f-grams').value.trim();const cv=document.getElementById('f-cost').value.trim();const old=i>=0?D.inv.filament[i]:null;
+  const obj={id:old?old.id:uid('f'),brand,type,variant,name:[type,variant].filter(Boolean).join(' '),c:document.getElementById('f-color').value,transparent:document.getElementById('f-trans').checked,g:gv===''?null:Math.max(0,parseFloat(gv)||0),spool:parseFloat(document.getElementById('f-spool').value)||1000,cost:cv===''?null:Math.max(0,parseFloat(cv)||0),best:{nozzle:document.getElementById('f-noz').value.trim(),bed:document.getElementById('f-bed').value.trim()},tests:old?(old.tests||[]):[]};
+  if(i>=0)D.inv.filament[i]=obj;else D.inv.filament.push(obj);save();renderAll();closeSheet();toast(i>=0?'Spool updated':'Spool added');
+}
+function filamentOptions(){return D.inv.filament.map(m=>`<option value="${attr(m.id)}">${esc(filamentPickerText(m))}</option>`).join('');}
+function quickFilamentSelectedHTML(id){const f=findFil(id)||D.inv.filament[0];if(!f)return '<div class="pick"><div>No filament</div></div>';return `<div class="pick" onclick="openQuickFilamentPicker()">${swatchHTML(f)}<div><div>${esc(filamentName(f,true))}</div><div class="meta">Tap to change${filamentStockNote(f)?' · '+esc(filamentStockNote(f)):''}</div></div></div>`;}
+function openQuickFilamentPicker(){const box=document.getElementById('q-fil-picker');if(!box)return;box.style.display=box.style.display==='none'?'flex':'none';box.innerHTML=D.inv.filament.map(f=>`<div class="pick" onclick="chooseQuickFilament('${attr(f.id)}')">${swatchHTML(f)}<div><div>${esc(filamentName(f,true))}</div><div class="meta">${esc(f.type||'')}${f.transparent?' · transparent':''}${filamentStockNote(f)?' · '+esc(filamentStockNote(f)):''}</div></div></div>`).join('');}
+function chooseQuickFilament(id){document.getElementById('q-fil').value=id;document.getElementById('q-fil-selected').innerHTML=quickFilamentSelectedHTML(id);const box=document.getElementById('q-fil-picker');if(box)box.style.display='none';}
+function openQuickPrint(i){const q=i>=0?D.quickPrints[i]:{name:'',kind:'Whim',date:day(),filamentId:D.inv.filament[0]?.id||'',grams:'',projectId:'',iteration:'',orientation:'Flat',supportType:'None',supportBase:'Model material',supportInterface:'None',supportIssue:'None',result:'Saved',failure:'',notes:''};openSheet(`<h3>${i>=0?'Edit quick print':'Save quick print'}</h3><div class="lbl">Title</div><input class="field" id="q-name" value="${attr(q.name)}" placeholder="e.g. Transparent PETG frame test"><div class="row2"><div><div class="lbl">Type</div><select class="field" id="q-kind">${['Whim','Material Test','Project Attempt'].map(x=>`<option ${x===q.kind?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Result</div><select class="field" id="q-result">${['Saved','Success','Failed','Mixed'].map(x=>`<option ${x===q.result?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Filament</div><input type="hidden" id="q-fil" value="${attr(q.filamentId)}"><div id="q-fil-selected">${quickFilamentSelectedHTML(q.filamentId)}</div><div class="pick-list" id="q-fil-picker" style="display:none"></div><div class="row2"><div><div class="lbl">Grams used</div><input class="field mono" id="q-grams" inputmode="decimal" value="${attr(q.grams||'')}" placeholder="e.g. 63"></div><div><div class="lbl">Project optional</div><select class="field" id="q-proj"><option value="">Standalone</option>${D.projects.map(p=>`<option value="${attr(p.id)}" ${p.id===q.projectId?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Orientation</div><select class="field" id="q-orient">${['Flat','Upright','Angled','Face up','Face down','Split model','Custom'].map(x=>`<option ${x===q.orientation?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support type</div><select class="field" id="q-support">${['None','Tree/Organic','Normal','Hybrid','Painted/Manual'].map(x=>`<option ${x===q.supportType?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="row2"><div><div class="lbl">Support base</div><select class="field" id="q-sbase">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportBase?'selected':''}>${x}</option>`).join('')}</select></div><div><div class="lbl">Support interface</div><select class="field" id="q-sint">${['None','Model material','PLA','PETG','PVA'].map(x=>`<option ${x===q.supportInterface?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="lbl">Support / orientation outcome</div><select class="field" id="q-sissue">${['None','Supports clean','Supports hard but removable','Supports trapped','Damaged surface','Damaged function','Warping/lift','Wobble/knocked loose'].map(x=>`<option ${x===q.supportIssue?'selected':''}>${x}</option>`).join('')}</select><div class="lbl">Failure / issue</div><input class="field" id="q-failure" value="${attr(q.failure||'')}" placeholder="e.g. supports trapped in groove"><div class="lbl">Notes / what happened</div><textarea class="field" id="q-notes">${esc(q.notes||'')}</textarea><div class="sheet-actions"><button class="btn full" onclick="saveQuickPrint(${i})">Save print</button><button class="btn ghost" onclick="closeSheet()">Cancel</button>${i>=0?`<button class="btn danger" onclick="deleteQuickPrint(${i})">Delete</button>`:''}</div>`);}
+function renderInv(){
+  document.getElementById('inv-fil-btn').classList.toggle('on',invMode==='filament');document.getElementById('inv-hw-btn').classList.toggle('on',invMode==='hardware');
+  const el=document.getElementById('inv-list');
+  if(invMode==='filament'){
+    document.getElementById('inv-sub').textContent=D.inv.filament.length+' spools';
+    el.innerHTML=D.inv.filament.map((m,i)=>{let mid;if(m.g==null){mid=`<div class="ctl"><span class="grams confirm">confirm stock</span><span class="spend"><button class="chip edit" onclick="openInv(${i})">Edit</button></span></div>`;}else{const low=m.g<250,pct=Math.max(2,Math.min(100,m.g/(m.spool||1000)*100));mid=`<div class="bar"><i style="width:${pct}%;background:${m.c}"></i></div><div class="ctl"><span class="grams ${low?'low':''}">${low?Math.round(m.g)+'g ⚠':'stock ok'}</span><span class="spend"><button class="chip" onclick="spendFil(${i},10)">−10</button><button class="chip" onclick="spendFil(${i},25)">−25</button><button class="chip" onclick="spendFil(${i},50)">−50</button><button class="chip edit" onclick="openInv(${i})">✎</button></span></div>`;}const cost=m.cost?` · $${Number(m.cost).toFixed(2)} spool`:'';const tests=(m.tests||[]).length;return `<div class="card inv"><div class="top tap" onclick="openInv(${i})">${swatchHTML(m)}<span class="name">${esc(filamentName(m,true))}</span><span class="type">${esc(m.type)}</span></div>${mid}<div class="hw-meta">${m.spool?m.spool+'g spool':''}${cost}${m.transparent?' · transparent':''}${tests?' · '+tests+' test logs':''}</div></div>`;}).join('')+`<button class="add-build" onclick="openInv(-1)">+ Add spool</button>`;
+  }else{
+    document.getElementById('inv-sub').textContent=D.inv.hardware.length+' hardware bins';
+    el.innerHTML=D.inv.hardware.map((h,i)=>{const low=(Number(h.min)||0)>0&&(Number(h.qty)||0)<Number(h.min);const used=hardwareRequiredTotal(h);return `<div class="card"><div class="hw-row tap" onclick="openHardware(${i})"><div><div class="hw-name">${esc(h.name)}</div><div class="hw-meta">${esc(h.category||'Hardware')} · min ${fmtQty(h.min,h.unit)}${used?` · open projects need ${fmtQty(used,h.unit)}`:''}${h.notes?' · '+esc(h.notes):''}</div></div><div><div class="qty ${low?'low':''}">${fmtQty(h.qty,h.unit)}${low?' ⚠':''}</div></div></div><div class="b-actions"><button class="act" onclick="adjustHardware(${i},-1)">−1</button><button class="act" onclick="adjustHardware(${i},1)">+1</button><button class="act" onclick="openHardware(${i})">Edit</button></div></div>`;}).join('')+`<button class="add-build" onclick="openHardware(-1)">+ Add hardware</button>`;
+  }
+}
 
 function renderAll(){renderStats();renderDashboard();renderDashboardExtras();renderInv();renderProjects();renderQuick();renderKnowledge();renderProc();refreshInboxDot();}
 load();renderAll();go('dash');
