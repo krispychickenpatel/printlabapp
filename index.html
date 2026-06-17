@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Print Lab">
 <meta name="theme-color" content="#16161A">
-<title>Print Lab v5.2 HOTFIX — Project System</title>
+<title>Print Lab v5.3 PERSISTENCE HOTFIX — Project System</title>
 <style>
 :root{
   --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--surface3:#303039;--line:#34343C;
@@ -164,8 +164,8 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY='printlab_app_v52';
-const OLDKEYS=['printlab_app_v51','printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2'];
+const KEY='printlab_app';
+const OLDKEYS=['printlab_app_v52','printlab_app_v51','printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2','printlab_app_v52_auto','printlab_app_v51_auto','printlab_app_v5_auto'];
 let D;
 let invMode='filament';
 let projectFilter='open';
@@ -276,7 +276,7 @@ function normalizeData(){
   D.inv=D.inv||{filament:[],hardware:[]};D.inv.filament=D.inv.filament||[];D.inv.hardware=D.inv.hardware||[];
   D.projects=D.projects||[];D.knowledge=D.knowledge||[];D.procurement=D.procurement||{manual:[]};D.procurement.manual=D.procurement.manual||[];
   D.standards=D.standards||[];D.schemes=D.schemes||[];D.inbox=D.inbox||[];if(D.lastBackup===undefined)D.lastBackup=null;
-  D.quickPrints=D.quickPrints||[];D.suggestions=D.suggestions||[];D.inv.filament.forEach(f=>{if(f.brand===undefined)f.brand='';if(f.transparent===undefined)f.transparent=/transparent|clear/i.test((f.name||'')+' '+(f.type||''));if(!f.tests)f.tests=[];if(!f.best)f.best={};});D.projects.forEach(p=>{p.attempts=p.attempts||[];});D.version=5.2;
+  D.quickPrints=D.quickPrints||[];D.suggestions=D.suggestions||[];D.inv.filament.forEach(f=>{if(f.brand===undefined)f.brand='';if(f.transparent===undefined)f.transparent=/transparent|clear/i.test((f.name||'')+' '+(f.type||''));if(!f.tests)f.tests=[];if(!f.best)f.best={};});D.projects.forEach(p=>{p.attempts=p.attempts||[];});D.version=5.3;
 }
 function save(silent){
   D.updated=new Date().toISOString();
@@ -762,7 +762,7 @@ function renderInv(){
 
 
 /* ---------- v5.2 HOTFIX: iPhone sheet scroll reset + Quick Print title/project controls ---------- */
-const APP_BUILD='v5.2 hotfix';
+const APP_BUILD='v5.3 persistence hotfix';
 function openSheet(html){
   const sheet=document.getElementById('sheet');
   const body=document.getElementById('sheet-body');
@@ -844,6 +844,77 @@ function convertQuickToProject(id){
 }
 
 function renderAll(){renderStats();renderDashboard();renderDashboardExtras();renderInv();renderProjects();renderQuick();renderKnowledge();renderProc();refreshInboxDot();}
+
+
+/* ---------- v5.3 PERSISTENCE HOTFIX: stable storage key + rescue merge from old keys ---------- */
+function recordCount(x){
+  if(!x)return 0;
+  return (x.projects||[]).length+(x.quickPrints||[]).length+(x.knowledge||[]).length+(x.inbox||[]).length+(x.inv?.filament||[]).length+(x.inv?.hardware||[]).length;
+}
+function stampVal(x){
+  const t=x&&x.updated?new Date(x.updated).getTime():0;
+  return isNaN(t)?0:t;
+}
+function parseStored(k){
+  try{const r=localStorage.getItem(k);if(!r)return null;const x=JSON.parse(r);return migrateOld(x);}catch(e){return null;}
+}
+function mergeById(base,other,arrName){
+  base[arrName]=base[arrName]||[];other[arrName]=other[arrName]||[];
+  const seen=new Set(base[arrName].map(x=>x.id).filter(Boolean));
+  other[arrName].forEach(x=>{if(!x)return;if(x.id&&!seen.has(x.id)){base[arrName].push(x);seen.add(x.id);}});
+}
+function mergeInv(base,other){
+  base.inv=base.inv||{filament:[],hardware:[]};other.inv=other.inv||{filament:[],hardware:[]};
+  const filSeen=new Set(base.inv.filament.map(x=>x.id).filter(Boolean));
+  other.inv.filament.forEach(x=>{if(x&&x.id&&!filSeen.has(x.id)){base.inv.filament.push(x);filSeen.add(x.id);}});
+  const hwSeen=new Set(base.inv.hardware.map(x=>x.id).filter(Boolean));
+  other.inv.hardware.forEach(x=>{if(x&&x.id&&!hwSeen.has(x.id)){base.inv.hardware.push(x);hwSeen.add(x.id);}});
+}
+function mergeStoredData(items){
+  items=items.filter(Boolean).sort((a,b)=>stampVal(b)-stampVal(a)||recordCount(b)-recordCount(a));
+  if(!items.length)return freshData();
+  const base=items[0];
+  normalizeDataOn(base);
+  items.slice(1).forEach(o=>{
+    normalizeDataOn(o);
+    mergeById(base,o,'projects');
+    mergeById(base,o,'knowledge');
+    mergeById(base,o,'inbox');
+    mergeById(base,o,'quickPrints');
+    mergeById(base,o,'suggestions');
+    mergeInv(base,o);
+    base.procurement=base.procurement||{manual:[]};o.procurement=o.procurement||{manual:[]};
+    const pSeen=new Set((base.procurement.manual||[]).map(x=>x.id).filter(Boolean));
+    (o.procurement.manual||[]).forEach(x=>{if(x&&x.id&&!pSeen.has(x.id)){base.procurement.manual.push(x);pSeen.add(x.id);}});
+    mergeById(base,o,'standards');
+    mergeById(base,o,'schemes');
+    base.materialUsed=Math.max(Number(base.materialUsed)||0,Number(o.materialUsed)||0);
+    if(!base.lastBackup&&o.lastBackup)base.lastBackup=o.lastBackup;
+  });
+  return base;
+}
+function normalizeDataOn(obj){
+  const oldD=D;D=obj;normalizeData();obj=D;D=oldD;return obj;
+}
+function load(){
+  try{
+    const keys=[KEY,...OLDKEYS];
+    const items=[];
+    keys.forEach(k=>{const x=parseStored(k);if(x)items.push(x);});
+    if(items.length){D=mergeStoredData(items);normalizeData();save(true);return;}
+    D=freshData();normalizeData();save(true);
+  }catch(e){D=freshData();normalizeData();save(true);}
+}
+function save(silent){
+  D.updated=new Date().toISOString();
+  try{
+    localStorage.setItem(KEY,JSON.stringify(D));
+    localStorage.setItem(KEY+'_auto',JSON.stringify(D));
+    localStorage.setItem('printlab_last_good',JSON.stringify(D));
+  }catch(e){}
+  if(!silent){renderStats();refreshInboxDot();}
+}
+
 load();renderAll();go('dash');
 </script>
 </body>
