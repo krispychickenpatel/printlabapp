@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Print Lab">
 <meta name="theme-color" content="#16161A">
-<title>Print Lab v5.4 — Project System</title>
+<title>Print Lab v5.5 — Project System</title>
 <style>
 :root{
   --bg:#16161A;--surface:#1F1F24;--surface2:#27272E;--surface3:#303039;--line:#34343C;
@@ -58,6 +58,17 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s}.scrim.on{opacity:1;pointer-events:auto}.sheet{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--bg);border-top:.5px solid var(--line);border-radius:20px 20px 0 0;padding:8px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .24s cubic-bezier(.2,.8,.2,1)}.sheet.on{transform:none}.grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 14px}.sheet h3{font-size:16px;font-weight:750;margin-bottom:14px}.sheet-actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
 @media (max-width:390px){main{padding-left:12px;padding-right:12px}.reqgrid{grid-template-columns:1fr}.row3{grid-template-columns:1fr}.tab{font-size:8.8px}.tab svg{width:20px;height:20px}.btn{padding-left:13px;padding-right:13px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.tl{margin-top:10px}.tl-item{display:flex;gap:10px;padding:9px 0;border-bottom:.5px solid var(--line)}.tl-item:last-child{border-bottom:none}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;border:2px solid var(--line)}
+.tl-dot.success{background:var(--green);border-color:var(--green)}.tl-dot.failed{background:var(--red);border-color:var(--red)}
+.tl-dot.mixed{background:var(--yellow);border-color:var(--yellow)}.tl-dot.note{background:var(--blue);border-color:var(--blue)}
+.tl-body{flex:1;min-width:0}.tl-title{font-size:13px;font-weight:650;line-height:1.3}.tl-meta{font-size:11px;color:var(--dim);margin-top:2px}
+.tl-note{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
+.detail-stat{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.detail-stat .ds{background:var(--surface2);border:.5px solid var(--line);border-radius:10px;padding:9px 11px}
+.detail-stat .ds .dv{font-size:17px;font-weight:750}.detail-stat .ds .dl{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--dim);margin-top:1px}
+.proj-card-compact .b-top{margin-bottom:5px}.proj-card-compact .b-meta{font-size:11.5px;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -84,7 +95,8 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
   <section class="view" id="v-projects">
     <div class="view-h">Projects <span class="sub" id="projects-sub"></span></div>
     <div class="seg" id="project-filters"></div>
-    <button class="add-build" onclick="openProject(-1)">+ New project</button>
+    <div style="display:flex;gap:8px"><button class="add-build" style="margin-bottom:0;flex:1" onclick="openProject(-1)">+ New project</button><button class="add-build" style="margin-bottom:0;flex:1" onclick="openScheme(-1)">+ New colour scheme</button></div>
+    <div style="height:10px"></div>
     <div id="projects-list"></div>
   </section>
 
@@ -164,6 +176,9 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 <div class="toast" id="toast"></div>
 
 <script>
+
+
+
 
 const KEY='printlab_app';
 const OLDKEYS=['printlab_app_v52','printlab_app_v51','printlab_app_v5','printlab_app_v4','printlab_app_v3','printlab_app_v2','printlab_app_v52_auto','printlab_app_v51_auto','printlab_app_v5_auto'];
@@ -1638,18 +1653,20 @@ function renderProjects(){
 function statusRank(s){return {active:1,queue:2,failed:3,done:4}[s]||9;}
 function projectCard(b){
   const scheme=byId(D.schemes,b.schemeId);const colors=(b.colors&&b.colors.length)?b.colors:(scheme?scheme.colors:[]);
-  const mats=colors.length?`<div class="b-mats">${colors.slice(0,8).map(c=>`<span class="pill"><span class="swatch" style="background:${c.hex}"></span>${esc(c.label||c.hex)}</span>`).join('')}</div>`:'';
-  const meta=[b.type?esc(b.type):'',b.est?`Est. ${Math.round(b.est)}g`:'',b.used>0?`Used ${Math.round(b.used)}g`:'' ,b.started?`Started ${esc(b.started)}`:''].filter(Boolean).join(' · ');
-  const block=(b.blocking&&statusOpen(b.status))?`<div class="b-block">⏳ ${esc(b.blocking)}</div>`:'';
-  const next=(b.nextAction&&statusOpen(b.status))?`<div class="b-next">→ ${esc(b.nextAction)}</div>`:'';
-  const req=reqSummary(b);const task=taskSummary(b);
-  const k=(b.knowledgeIds||[]).map(id=>byId(D.knowledge,id)).filter(Boolean).slice(0,3);
-  let actions='';if(b.status!=='done'){
-    const nextStatus=b.status==='queue'?['active','Start']:b.status==='active'?['done','Mark done']:['queue','Requeue'];
-    actions=`<div class="b-actions"><button class="act primary" onclick="cycleProject('${b.id}','${nextStatus[0]}')">${nextStatus[1]}</button><button class="act" onclick="openIterationSheet('${b.id}')">+ Iteration</button><button class="act" onclick="openUsedSheet('${b.id}')">+ Grams</button><button class="act" onclick="openProjectById('${b.id}')">Edit</button></div>`;
-  }else actions=`<div class="b-actions"><button class="act" onclick="openProjectById('${b.id}')">View/Edit</button><button class="act" onclick="cycleProject('${b.id}','queue')">Requeue</button></div>`;
-  const iters=(b.iterations&&b.iterations.length)?b.iterations.slice(-2).map(it=>`<div class="iter">${esc(it.date)}${it.rev?' · '+esc(it.rev):''} — ${esc(it.problem||it.result||'Iteration')}</div>`).join(''):'';
-  return `<div class="card"><div class="b-top tap" onclick="openProjectById('${b.id}')"><span class="b-name">${esc(b.name)}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="pill">P${esc(b.phase||'-')}</span><span class="badge ${b.status}">${esc(b.status)}</span></span></div><div class="b-meta">${meta}</div>${block}${next}${mats}<div class="reqgrid"><div class="reqbox ${req.matMissing?'miss':'ok'}"><b>Materials</b>${req.matTxt}</div><div class="reqbox ${req.hwMissing?'miss':'ok'}"><b>Hardware</b>${req.hwTxt}</div></div>${task.total?`<div class="progress"><i style="width:${task.pct}%"></i></div><div class="hw-meta">Tasks: ${task.done}/${task.total} done</div>`:''}${k.length?`<div class="b-mats">${k.map(x=>`<span class="pill blue">${esc(x.title)}</span>`).join('')}</div>`:''}${iters}${actions}</div>`;
+  const dots=colors.slice(0,6).map(c=>`<span class="swatch" style="background:${c.hex}"></span>`).join('');
+  const meta=[b.type?esc(b.type):'',b.est?`Est. ${Math.round(b.est)}g`:'',b.used>0?`Used ${Math.round(b.used)}g`:''].filter(Boolean).join(' · ');
+  const block=(b.blocking&&statusOpen(b.status))?`<div class="b-block" style="margin-top:5px">⏳ ${esc(b.blocking)}</div>`:'';
+  const next=(b.nextAction&&statusOpen(b.status))?`<div class="b-next" style="margin-top:4px">→ ${esc(b.nextAction)}</div>`:'';
+  const task=taskSummary(b);
+  const totalLogs=(b.iterations||[]).length+(b.attempts||[]).length;
+  let actions='';
+  if(b.status!=='done'){
+    const ns=b.status==='queue'?['active','Start']:b.status==='active'?['done','Done']:['queue','Requeue'];
+    actions=`<div class="b-actions"><button class="act primary" onclick="cycleProject('${b.id}','${ns[0]}')">${ns[1]}</button><button class="act" onclick="openLogAttempt('${b.id}')">Log attempt</button><button class="act" onclick="openProjectDetail('${b.id}')">View</button><button class="act" onclick="openProjectById('${b.id}')">Edit</button></div>`;
+  } else {
+    actions=`<div class="b-actions"><button class="act" onclick="openProjectDetail('${b.id}')">View</button><button class="act" onclick="openProjectById('${b.id}')">Edit</button><button class="act" onclick="cycleProject('${b.id}','queue')">Requeue</button></div>`;
+  }
+  return `<div class="card proj-card-compact"><div class="b-top tap" onclick="openProjectDetail('${b.id}')"><span class="b-name">${esc(b.name)}</span><span style="display:flex;gap:5px;align-items:center">${dots?`<span style="display:flex;gap:3px">${dots}</span>`:''}<span class="pill">P${esc(b.phase||'-')}</span><span class="badge ${b.status}">${esc(b.status)}</span></span></div><div class="b-meta">${meta}${totalLogs?` · ${totalLogs} log${totalLogs>1?'s':''}`:''}${task.total?` · ${task.done}/${task.total} tasks`:''}</div>${block}${next}${actions}</div>`;
 }
 function taskSummary(b){const t=b.tasks||[];const done=t.filter(x=>x.done).length;return{total:t.length,done,pct:t.length?Math.round(done/t.length*100):0};}
 function reqSummary(b){
@@ -1660,8 +1677,42 @@ function reqSummary(b){
 }
 function materialHave(m){const inv=m.invId?findFil(m.invId):D.inv.filament.find(x=>norm(x.name)===norm(m.name));return inv&&inv.g!=null?Number(inv.g)||0:0;}
 function hardwareHave(h){const inv=h.invId?findHw(h.invId):D.inv.hardware.find(x=>norm(x.name)===norm(h.name));return inv?Number(inv.qty)||0:0;}
-function openProjectById(id){const i=D.projects.findIndex(p=>p.id===id);if(i>=0)openProject(i);}
 function cycleProject(id,to){const b=byId(D.projects,id);if(!b)return;b.status=to;if(to==='active'&&!b.started)b.started=mon();if(to==='done')b.doneDate=mon();save();renderAll();toast(to==='done'?'Project completed':`Project set to ${to}`);}
+function openProjectDetail(id){
+  const b=byId(D.projects,id);if(!b)return;
+  const task=taskSummary(b);
+  let events=[];
+  (b.iterations||[]).forEach(it=>events.push({ts:it.date||'',dot:!it.result||it.result==='Failed'?'failed':it.result==='Success'||it.result==='success'?'success':'note',title:it.rev&&it.rev!=='Failed'&&it.rev!=='Success'&&it.rev!=='Mixed'&&it.rev!=='In progress'?`${it.rev} — ${it.problem||''}`:it.problem||it.result||'Logged',sub:it.fix?'Fix idea: '+it.fix:''}));
+  (D.quickPrints||[]).filter(q=>q.projectId===id).forEach(q=>{const f=q.filamentId?findFil(q.filamentId):null;const res=(q.result||'').toLowerCase();const dot=res==='success'||res==='saved'?'success':res==='failed'?'failed':'mixed';events.push({ts:q.date||'',dot,title:q.name||'Quick print',sub:[f?f.name:'',q.grams?q.grams+'g':'',q.failure||''].filter(Boolean).join(' · ')});});
+  events.sort((a,b2)=>(b2.ts||'').localeCompare(a.ts||''));
+  const tlHTML=events.length?events.map(e=>`<div class="tl-item"><div class="tl-dot ${e.dot}"></div><div class="tl-body"><div class="tl-title">${esc(e.title)}</div>${e.sub?`<div class="tl-meta">${esc(e.sub)}</div>`:''}<div class="tl-meta dim">${esc(e.ts)}</div></div></div>`).join(''):'<div class="empty">No attempts logged yet. Tap &ldquo;Log attempt&rdquo; to start the history.</div>';
+  const mats=(b.materials||[]).map(m=>`<span class="pill"><span class="swatch" style="background:${m.color||'#888'}"></span>${esc(m.name)} ${Math.round(m.grams||0)}g</span>`).join('');
+  const taskRows=(b.tasks||[]).map((t,j)=>`<div class="checkline" style="padding:7px 0;border-bottom:.5px solid var(--line)"><input type="checkbox" ${t.done?'checked':''} onchange="toggleDetailTask('${id}',${j},this.checked)"><span style="font-size:13px;${t.done?'text-decoration:line-through;color:var(--dim)':''}">${esc(t.text)}</span></div>`).join('');
+  const ns=b.status==='queue'?['active','Start']:b.status==='active'?['done','Mark done']:['queue','Requeue'];
+  openSheet(`<h3>${esc(b.name)}</h3><div class="detail-stat"><div class="ds"><div class="dv"><span class="badge ${b.status}">${esc(b.status)}</span></div><div class="dl">Status</div></div><div class="ds"><div class="dv">${task.total?task.done+'/'+task.total:'—'}</div><div class="dl">Tasks</div></div><div class="ds"><div class="dv">${events.length}</div><div class="dl">Log entries</div></div><div class="ds"><div class="dv">${b.used?Math.round(b.used)+'g':'—'}</div><div class="dl">Used</div></div></div>${b.blocking?`<div class="b-block" style="margin-bottom:8px">⏳ ${esc(b.blocking)}</div>`:''}${b.nextAction?`<div class="b-next" style="margin-bottom:10px">→ ${esc(b.nextAction)}</div>`:''}${mats?`<div class="b-mats" style="margin-bottom:10px">${mats}</div>`:''}${taskRows?`<div class="lbl" style="margin-top:4px">Checklist</div>${taskRows}`:''}<div class="lbl" style="margin-top:14px">Print history</div><div class="tl">${tlHTML}</div><div class="sheet-actions"><button class="btn full" onclick="openLogAttempt('${id}')">+ Log attempt</button><button class="btn ghost" onclick="openProjectEditById('${id}')">Edit project</button><button class="btn ghost" onclick="closeSheet();cycleProject('${id}','${ns[0]}')">${ns[1]}</button><button class="btn ghost" onclick="closeSheet()">Close</button></div>`);
+}
+function toggleDetailTask(projectId,taskIdx,checked){const b=byId(D.projects,projectId);if(!b||!b.tasks[taskIdx])return;b.tasks[taskIdx].done=checked;save();openProjectDetail(projectId);}
+
+function openLogAttempt(id){
+  const b=byId(D.projects,id);if(!b)return;
+  const filOpts='<option value="">— skip —</option>'+D.inv.filament.map(f=>`<option value="${attr(f.id)}">${esc((f.brand?f.brand+' ':'')+f.name)} (${f.g==null?'confirm':Math.round(f.g)+'g'})</option>`).join('');
+  openSheet(`<h3>Log attempt · ${esc(b.name)}</h3><div class="lbl">Result</div><select class="field" id="la-result"><option>Success</option><option>Failed</option><option>Mixed</option><option>In progress</option></select><div class="lbl">What happened / what failed</div><textarea class="field" id="la-note" placeholder="e.g. supports trapped in the gear channel, flat orientation — bad idea" style="min-height:90px"></textarea><div class="row2"><div style="flex:1"><div class="lbl">Filament (optional)</div><select class="field" id="la-fil">${filOpts}</select></div><div><div class="lbl">Grams</div><input class="field mono" id="la-g" inputmode="decimal" placeholder="63" style="width:80px"></div></div><div class="row2"><div><div class="lbl">Orientation</div><select class="field" id="la-orient"><option>—</option><option>Flat</option><option>Upright</option><option>Angled</option><option>Face up</option><option>Face down</option><option>Split model</option></select></div><div style="flex:1"><div class="lbl">Fix / next idea</div><input class="field" id="la-fix" placeholder="e.g. rotate 90°"></div></div><div class="sheet-actions"><button class="btn full" onclick="saveLogAttempt('${id}')">Save</button><button class="btn ghost" onclick="openProjectDetail('${id}')">Back</button></div>`);
+}
+function saveLogAttempt(id){
+  const b=byId(D.projects,id);if(!b)return;
+  const note=document.getElementById('la-note').value.trim();
+  const result=document.getElementById('la-result').value;
+  const filId=document.getElementById('la-fil').value;
+  const grams=parseFloat(document.getElementById('la-g').value)||0;
+  const orient=document.getElementById('la-orient').value;
+  const fix=document.getElementById('la-fix').value.trim();
+  b.iterations=b.iterations||[];
+  b.iterations.push({id:uid('it'),date:day(),rev:result,problem:note||result,fix});
+  if(filId&&grams){const f=findFil(filId);if(f&&f.g!=null){f.g=Math.max(0,f.g-grams);D.materialUsed+=grams;b.used=(b.used||0)+grams;}}
+  if(result==='Failed'&&note){D.suggestions=D.suggestions||[];D.suggestions.push({id:uid('sg'),date:day(),title:b.name+': '+note.slice(0,60),category:'Failures',body:'Project: '+b.name+'\nOrientation: '+(orient||'not logged')+'\nResult: '+result+'\nNote: '+note+(fix?'\nFix idea: '+fix:''),source:'Project attempt',sourceId:id,status:'pending'});}
+  save();renderAll();closeSheet();toast('Attempt logged');setTimeout(()=>openProjectDetail(id),250);
+}
+
 
 function openIterationSheet(id){const b=byId(D.projects,id);if(!b)return;openSheet(`<h3>Log iteration · ${esc(b.name)}</h3><div class="lbl">What changed / what failed / learned</div><textarea class="field" id="it-problem" placeholder="e.g. gear mesh too tight, skipped at speed"></textarea><div class="lbl">Fix or next revision idea (optional)</div><input class="field" id="it-fix" placeholder="e.g. bump clearance to 0.4mm"><div class="lbl">Revision label (optional)</div><input class="field" id="it-rev" placeholder="e.g. v2"><div class="sheet-actions"><button class="btn full" onclick="saveIterationSheet('${id}')">Save iteration</button><button class="btn ghost" onclick="closeSheet()">Cancel</button></div>`);}
 function saveIterationSheet(id){const b=byId(D.projects,id);if(!b)return;const problem=document.getElementById('it-problem').value.trim();if(!problem){toast('Add a note');return;}b.iterations=b.iterations||[];b.iterations.push({id:uid('it'),date:day(),rev:document.getElementById('it-rev').value.trim(),problem,fix:document.getElementById('it-fix').value.trim(),result:''});save();renderAll();closeSheet();toast('Iteration logged');}
@@ -2004,7 +2055,7 @@ function renderInv(){
 
 
 /* ---------- v5.2 HOTFIX: iPhone sheet scroll reset + Quick Print title/project controls ---------- */
-const APP_BUILD='v5.4 clean + embedded seed';
+const APP_BUILD='v5.5 project detail + log';
 function openSheet(html){
   const sheet=document.getElementById('sheet');
   const body=document.getElementById('sheet-body');
@@ -2021,6 +2072,9 @@ function closeSheet(){
   sheet.classList.remove('on');
   setTimeout(()=>{sheet.scrollTop=0;},120);
 }
+
+function openProjectById(id){openProjectDetail(id);}
+function openProjectEditById(id){const i=D.projects.findIndex(p=>p.id===id);if(i>=0)openProject(i);}
 function renderStats(){
   const open=D.projects.filter(p=>statusOpen(p.status)).length;
   const active=D.projects.filter(p=>p.status==='active').length;
@@ -2159,6 +2213,9 @@ function save(silent){
 }
 
 load();renderAll();go('dash');
+
+
+
 
 </script>
 </body>
