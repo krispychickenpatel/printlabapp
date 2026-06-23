@@ -129,6 +129,11 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
     <div class="card" id="manual-proc"></div>
   </section>
 
+  <section class="view" id="v-advisor">
+    <div class="view-h">AI Advisor <span class="sub">your data · your key</span></div>
+    <div id="v-advisor-body"></div>
+  </section>
+  
   <section class="view" id="v-report">
     <div class="view-h">Report</div>
     <div class="card">
@@ -169,6 +174,7 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
   <button class="tab" data-v="quick" onclick="go('quick')"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M17 16l3 3M20 16l-3 3"/></svg>Quick</button>
   <button class="tab" data-v="knowledge" onclick="go('knowledge')"><svg viewBox="0 0 24 24"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M8 8h8M8 12h6"/></svg>Knowledge</button>
   <button class="tab" data-v="proc" onclick="go('proc')"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H3M9 20a1 1 0 100-2 1 1 0 000 2zM17 20a1 1 0 100-2 1 1 0 000 2z"/></svg>Buy</button>
+  <button class="tab" data-v="advisor" onclick="go('advisor')"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 00-7 7c0 2.4 1.2 4.4 3 5.7V19h8v-3.3c1.8-1.3 3-3.3 3-5.7a7 7 0 00-7-7z"/><path d="M9.5 22h5"/></svg>Advisor</button>
 </nav>
 
 <div class="scrim" id="scrim" onclick="closeSheet()"></div>
@@ -2218,5 +2224,328 @@ load();renderAll();go('dash');
 
 
 </script>
+<style>
+.adv-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.adv-msg{border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.55;max-width:92%}
+.adv-msg.user{align-self:flex-end;background:var(--orange);color:#fff;border-bottom-right-radius:4px;white-space:pre-wrap}
+.adv-msg.ai{align-self:flex-start;background:var(--surface2);border:.5px solid var(--line);border-bottom-left-radius:4px;white-space:pre-wrap}
+.adv-think{align-self:flex-start;color:var(--dim);font-size:12.5px;padding:6px 4px}
+.adv-photo-tag{display:inline-block;font-size:10.5px;border:.5px dashed var(--line);color:var(--dim);border-radius:8px;padding:1px 7px;margin-bottom:5px}
+.adv-save{margin-top:9px}
+.adv-bar{display:flex;gap:7px;align-items:flex-end}
+.adv-bar textarea{flex:1;background:var(--surface2);border:.5px solid var(--line);color:var(--text);border-radius:12px;padding:10px 12px;font-size:14px;min-height:42px;max-height:130px;resize:none;line-height:1.4}
+.adv-icon{flex:0 0 auto;border:none;border-radius:11px;font-size:16px;padding:10px 11px;background:var(--surface2);border:.5px solid var(--line);color:var(--muted)}
+.adv-icon:active{opacity:.7}
+.adv-send{flex:0 0 auto;border:none;border-radius:11px;font-weight:750;font-size:13px;padding:11px 15px;background:var(--orange);color:#fff}
+.adv-send:disabled{opacity:.45}
+.adv-model{display:flex;gap:6px;margin-bottom:6px}
+.adv-model button{flex:1;font-size:11.5px;font-weight:650;padding:8px;border-radius:9px;background:var(--surface);border:.5px solid var(--line);color:var(--muted)}
+.adv-model button.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.adv-meta{font-size:11px;color:var(--dim);margin-bottom:9px;line-height:1.5}
+.adv-suggest{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.adv-chip{font-size:11.5px;font-weight:600;padding:7px 10px;border-radius:9px;background:var(--surface2);border:.5px solid var(--line);color:var(--text);text-align:left;line-height:1.3}
+.adv-chip:active{border-color:var(--orange);color:var(--orange)}
+.adv-pend{font-size:11.5px;color:var(--muted);margin-top:7px}
+</style>
+
+<script>
+/* ============================================================
+   PRINT LAB · AI ADVISOR MODULE
+   Depends on globals from the main script:
+   D, buildMarkdown, applyDigest, openSheet, closeSheet, esc,
+   norm, statusOpen, toast, go
+   ============================================================ */
+
+/* ---- ONE swappable endpoint. To move the key off the device
+   later (companion server on your iMac/Pi), change ONLY this line
+   to your server URL, e.g. 'https://your-mac.tailnet.ts.net/ask'.
+   Everything else stays. ---- */
+const ADVISOR_ENDPOINT = 'https://api.anthropic.com/v1/messages';
+
+const ADVISOR_KEY_LS   = 'printlab_api_key';
+const ADVISOR_MODEL_LS = 'printlab_api_model';
+const ADVISOR_MODELS = {
+  haiku:  { id:'claude-haiku-4-5-20251001', label:'Haiku · fast',   note:'cheapest — pennies per chat' },
+  sonnet: { id:'claude-sonnet-4-6',         label:'Sonnet · smart', note:'~5× cost, deeper reasoning' }
+};
+
+let advMessages = [];      // in-memory conversation (not persisted, not backed up)
+let advBusy = false;
+let advPendingImage = null; // { media_type, data(base64) }
+
+function advKey(){ try{ return localStorage.getItem(ADVISOR_KEY_LS) || ''; }catch(e){ return ''; } }
+function advModel(){ try{ return localStorage.getItem(ADVISOR_MODEL_LS) || 'haiku'; }catch(e){ return 'haiku'; } }
+function setAdvModel(m){ try{ localStorage.setItem(ADVISOR_MODEL_LS, m); }catch(e){} renderAdvisor(); }
+
+/* ---------- top-level render ---------- */
+function renderAdvisor(){
+  const el = document.getElementById('v-advisor-body');
+  if(!el) return;
+  el.innerHTML = advKey() ? advChatHTML() : advSetupHTML();
+  if(advKey()) advScrollBottom();
+}
+
+/* ---------- first-run setup (safety baked in) ---------- */
+function advSetupHTML(){
+  return `
+  <div class="card">
+    <div class="empty" style="line-height:1.65">
+      The advisor sends your questions to Anthropic using <b>your own API key</b>.
+      That key can <b>only spend API credits</b> — it can't read your account, your data,
+      or anything else. It's stored only in this browser and never goes into the app's
+      source or your JSON backups.
+    </div>
+  </div>
+  <div class="card">
+    <div class="lbl" style="margin-top:0">Step 1 · Make a dedicated key</div>
+    <div class="empty">Create a <b>new</b> key at
+      <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:var(--orange)">console.anthropic.com</a>.
+      Don't reuse your main one — a dedicated key means if it ever leaks you delete just this.</div>
+    <div class="lbl">Step 2 · Cap the damage</div>
+    <div class="empty">In the console, set a workspace <b>spend limit</b> (e.g. $10–20/mo).
+      Worst case if the key leaks: someone burns the cap, you delete the key. No data is exposed.</div>
+    <div class="lbl">Step 3 · Paste it here</div>
+    <input class="field mono" id="adv-key-input" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <label class="checkline" style="margin-top:11px"><input type="checkbox" id="adv-cap-ack"><span style="font-size:12.5px">I set a spend limit on this key</span></label>
+    <div class="sheet-actions"><button class="btn full" onclick="advSaveKey()">Save key &amp; start</button></div>
+  </div>`;
+}
+function advSaveKey(){
+  const v = (document.getElementById('adv-key-input').value || '').trim();
+  const ack = document.getElementById('adv-cap-ack').checked;
+  if(!v){ toast('Paste a key'); return; }
+  if(!v.startsWith('sk-ant-')){ toast("That doesn't look like an Anthropic key"); return; }
+  if(!ack && !confirm("You didn't confirm a spend limit. Without one, a leaked key has no billing ceiling. Continue anyway?")) return;
+  try{ localStorage.setItem(ADVISOR_KEY_LS, v); }catch(e){ toast('Could not save key'); return; }
+  advMessages = [];
+  renderAdvisor();
+  toast('Advisor ready');
+}
+function advClearKey(){
+  if(!confirm('Remove the API key from this browser?')) return;
+  try{ localStorage.removeItem(ADVISOR_KEY_LS); }catch(e){}
+  advMessages = [];
+  renderAdvisor();
+  toast('Key removed');
+}
+
+/* ---------- chat UI ---------- */
+function advChatHTML(){
+  const m = advModel();
+  const modelBtns = Object.keys(ADVISOR_MODELS).map(k =>
+    `<button class="${m===k?'on':''}" onclick="setAdvModel('${k}')">${ADVISOR_MODELS[k].label}</button>`).join('');
+  const suggestions = advMessages.length ? '' :
+    `<div class="adv-suggest">${advSuggestions().map(s=>`<button class="adv-chip" onclick="advQuick(this)">${esc(s)}</button>`).join('')}</div>`;
+  const body = advMessages.map((mm,i)=>renderAdvMsg(mm,i)).join('') + (advBusy?'<div class="adv-think">Thinking…</div>':'');
+  return `
+    <div class="adv-model">${modelBtns}</div>
+    <div class="adv-meta">${ADVISOR_MODELS[m].note} · key on this device only · <span class="tap" style="color:var(--orange)" onclick="advClearKey()">remove key</span></div>
+    ${suggestions}
+    <div class="adv-wrap" id="adv-messages">${body || '<div class="empty">Ask anything about your prints, inventory, failures, or what to make next. Answers are grounded in your actual Print Lab data.</div>'}</div>
+    <div class="adv-bar">
+      <input type="file" id="adv-file" accept="image/*" style="display:none" onchange="advPickImage(this)">
+      <button class="adv-icon" onclick="document.getElementById('adv-file').click()" title="Attach a print photo">📷</button>
+      <textarea id="adv-input" placeholder="${advPendingImage?'Describe the print in the photo…':'Ask the advisor…'}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();advSend();}"></textarea>
+      <button class="adv-send" id="adv-send-btn" onclick="advSend()" ${advBusy?'disabled':''}>Ask</button>
+    </div>
+    ${advPendingImage?`<div class="adv-pend">📷 photo attached · <span class="tap" style="color:var(--orange)" onclick="advPendingImage=null;renderAdvisor()">remove</span></div>`:''}`;
+}
+
+function advSuggestions(){
+  const out = [];
+  const active = (D.projects||[]).find(p=>p.status==='active');
+  if(active) out.push('Is '+active.name+' stocked to continue?');
+  out.push('What can I print with what I have loaded right now?');
+  const lastFail = (D.quickPrints||[]).slice().reverse().find(q=>q.result==='Failed');
+  if(lastFail) out.push('Why did '+lastFail.name+' fail, and what should I change?');
+  out.push('Given my inventory and queue, what should I print next?');
+  return out.slice(0,4);
+}
+
+function msgText(content){
+  if(typeof content === 'string') return content;
+  if(Array.isArray(content)) return content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  return '';
+}
+function renderAdvMsg(m,i){
+  if(m.role === 'user'){
+    const hasImg = Array.isArray(m.content) && m.content.some(b=>b.type==='image');
+    return `<div class="adv-msg user">${hasImg?'<div class="adv-photo-tag" style="border-color:rgba(255,255,255,.5);color:#fff">📷 photo</div>':''}${esc(msgText(m.content))}</div>`;
+  }
+  const shown = (m._clean != null) ? m._clean : msgText(m.content);
+  let html = `<div class="adv-msg ai">${esc(shown)}`;
+  if(m._payload) html += `<div class="adv-save"><button class="btn sm" onclick="advReviewSaveIdx(${i})">Review &amp; save to Print Lab</button></div>`;
+  html += `</div>`;
+  return html;
+}
+
+function advScrollBottom(){ setTimeout(()=>{ try{ window.scrollTo(0, document.body.scrollHeight); }catch(e){} }, 30); }
+
+function advQuick(btn){
+  const ta = document.getElementById('adv-input');
+  if(ta) ta.value = btn.textContent;
+  advSend();
+}
+
+/* ---------- send / call ---------- */
+async function advSend(){
+  if(advBusy) return;
+  const ta = document.getElementById('adv-input');
+  const q = (ta ? ta.value : '').trim();
+  if(!q && !advPendingImage){ toast('Type a question'); return; }
+
+  let userMsg;
+  if(advPendingImage){
+    userMsg = { role:'user', content:[
+      { type:'image', source:{ type:'base64', media_type:advPendingImage.media_type, data:advPendingImage.data } },
+      { type:'text', text: q || 'Analyze this print. What likely went wrong, and what should I change next time?' }
+    ]};
+  } else {
+    userMsg = { role:'user', content:q };
+  }
+  advMessages.push(userMsg);
+  advPendingImage = null;
+  advBusy = true;
+  renderAdvisor();
+
+  try{
+    const reply = await advisorCall();
+    const { clean, payload } = extractSavePayload(reply);
+    advMessages.push({ role:'assistant', content:reply, _clean:clean, _payload:payload });
+  }catch(err){
+    advMessages.push({ role:'assistant', content:'', _clean:'⚠ '+advFriendlyError(err), _payload:null });
+  }
+  advBusy = false;
+  renderAdvisor();
+}
+
+function apiMessages(){
+  // strip our private _clean/_payload fields; API only wants {role, content}
+  return advMessages.map(m=>({ role:m.role, content:m.content }));
+}
+
+async function advisorCall(){
+  const key = advKey();
+  if(!key){ const e=new Error('NO_KEY'); throw e; }
+  const res = await fetch(ADVISOR_ENDPOINT, {
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model: ADVISOR_MODELS[advModel()].id,
+      max_tokens: 1024,
+      system: advSystemPrompt(),
+      messages: apiMessages()
+    })
+  });
+  if(!res.ok){
+    let body=''; try{ body = await res.text(); }catch(e){}
+    const e = new Error('HTTP '+res.status); e.status = res.status; e.body = body; throw e;
+  }
+  const data = await res.json();
+  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+}
+
+function advFriendlyError(err){
+  if(err.message === 'NO_KEY') return 'No API key set.';
+  if(err.status === 401) return 'Key rejected (401). Re-check the key, or that it\'s active and not deleted.';
+  if(err.status === 429) return 'Rate limited / out of credit (429). Check your spend cap and balance in the console.';
+  if(err.status === 529) return 'Anthropic is overloaded (529). Try again in a moment.';
+  if(err.status === 400) return 'Bad request (400). '+((err.body||'').slice(0,180));
+  if(err.message && /Failed to fetch|NetworkError|Load failed/i.test(err.message))
+    return 'Network/CORS error. If you\'re testing inside the Claude chat preview, that\'s expected — real calls work on your deployed phone app. Otherwise check your connection.';
+  return (err.message||'Unknown error') + (err.body ? ' · '+err.body.slice(0,140) : '');
+}
+
+/* ---------- system prompt: behavior + your live data + save schema ---------- */
+function advSystemPrompt(){
+  const data = (typeof buildMarkdown === 'function') ? buildMarkdown() : '(no data available)';
+  return [
+    "You are the advisor built into Print Lab, Kris's 3D-printing tracker. You help with a Bambu Lab printer, filament inventory, project planning, and diagnosing print failures.",
+    "",
+    "STYLE: Direct and blunt. No filler, no \"great question\". Lead with the single most useful thing. Tag claims with confidence — [Certain] hard evidence, [Likely] strong inference, [Guessing] filling gaps; if a reply is mostly guessing, say so in the first line. Disagree when the data warrants it and say why. Keep it short — this renders on a phone.",
+    "",
+    "GROUNDING: The block below is Kris's CURRENT Print Lab data. Use it. For questions about stock, projects, or history, cite the actual numbers and entries rather than generic advice. If the data doesn't contain the answer, say so plainly — never invent inventory, projects, or past prints.",
+    "",
+    "PHOTO MODE: When an image is attached it's usually a print result. Name the failure modes you can actually see (stringing, layer shift, warping, support scarring, under/over-extrusion, elephant foot). Be honest that a photo can't reveal root cause on its own — distinguish what you observe from what you'd need to confirm (temps, moisture, adhesion).",
+    "",
+    "SAVING: Only if your reply contains a concrete, reusable entry worth storing (a lesson, an iteration note for a specific project, a procurement need, or a task), append at the very END a block in EXACTLY this format and write nothing after it:",
+    "[[PRINTLAB_SAVE]]",
+    '{ "knowledge":[{"title":"","category":"Materials|Printer Settings|Tolerances|Hardware|Workflow|Lessons|Failures|Preferences","material":"","body":"","tags":""}], "iterations":[{"project":"name fragment","note":"","fix":""}], "procurement":[{"name":"","category":"Materials|Hardware|Tools|Electronics|Consumables|Want","qty":1,"unit":"pcs","source":"","notes":""}], "tasks":[{"project":"name fragment","text":""}] }',
+    "[[/PRINTLAB_SAVE]]",
+    "Omit any array you don't need. Never emit the block for plain Q&A or chit-chat. Don't mention or explain the block in your prose — the app parses it and shows Kris a save button.",
+    "",
+    "=== CURRENT PRINT LAB DATA ===",
+    data
+  ].join('\n');
+}
+
+/* ---------- detect + strip the save block ---------- */
+function extractSavePayload(text){
+  const m = text.match(/\[\[PRINTLAB_SAVE\]\]([\s\S]*?)\[\[\/PRINTLAB_SAVE\]\]/);
+  if(!m) return { clean:(text||'').trim(), payload:null };
+  let payload = null;
+  try{ payload = JSON.parse(m[1].trim()); }catch(e){ payload = null; }
+  const clean = text.replace(m[0],'').trim();
+  return { clean, payload };
+}
+
+/* ---------- route a proposed payload through the EXISTING digest
+   preview + applyDigest() flow (same checkbox IDs, same writer) ---------- */
+function advReviewSaveIdx(i){
+  const m = advMessages[i];
+  if(m && m._payload) advReviewSave(m._payload);
+}
+function advReviewSave(obj){
+  pendingDigest = obj; // shared global from the main script — applyDigest() reads this
+  const sec = (title,arr,render)=>{ if(!Array.isArray(arr)||!arr.length) return ''; return `<div class="dg-group"><h4>${title} · ${arr.length}</h4>${arr.map((x,j)=>render(x,j)).join('')}</div>`; };
+  const projMatch = (frag)=>D.projects.find(p=>statusOpen(p.status) && frag && norm(p.name).includes(norm(frag)));
+  const filMatch  = (frag)=>D.inv.filament.find(f=>frag && norm(f.name).includes(norm(frag)));
+
+  let html = `<h3>Review &amp; save</h3><div class="empty" style="margin-bottom:6px">Proposed by the advisor. Uncheck anything you don't want. Items that can't match a project/filament are flagged and skipped.</div>`;
+  html += sec('Knowledge', obj.knowledge, (x,j)=>`<label class="dg-item"><input type="checkbox" id="dg-k-${j}" checked><span><b>${esc(x.title||x.body||'Knowledge')}</b><br><span class="dim">${esc(x.category||'Lessons')}${x.material?' · '+esc(x.material):''}</span></span></label>`);
+  html += sec('Iterations', obj.iterations, (x,j)=>{ const p=projMatch(x.project); return `<label class="dg-item"><input type="checkbox" id="dg-i-${j}" ${p?'checked':'disabled'}><span>${esc(x.note||'')}<br><span class="${p?'dim':'dg-skip'}">${p?'→ '+esc(p.name):'no project match — skipped'}</span></span></label>`; });
+  html += sec('Filament use', obj.filament, (x,j)=>{ const f=filMatch(x.name); const ok=f&&f.g!=null; return `<label class="dg-item"><input type="checkbox" id="dg-f-${j}" ${ok?'checked':'disabled'}><span>${esc(x.name||'')} − ${esc(x.grams||0)}g<br><span class="${ok?'dim':'dg-skip'}">${ok?'→ '+esc(f.name):(f?'spool stock not set — skipped':'no filament match — skipped')}</span></span></label>`; });
+  html += sec('Procurement', obj.procurement, (x,j)=>`<label class="dg-item"><input type="checkbox" id="dg-p-${j}" checked><span>${esc(x.name||'')} <span class="dim">× ${esc(x.qty||1)} · ${esc(x.category||'Hardware')}</span></span></label>`);
+  html += sec('Tasks', obj.tasks, (x,j)=>{ const p=projMatch(x.project); return `<label class="dg-item"><input type="checkbox" id="dg-t-${j}" ${p?'checked':'disabled'}><span>${esc(x.text||'')}<br><span class="${p?'dim':'dg-skip'}">${p?'→ '+esc(p.name):'no project match — skipped'}</span></span></label>`; });
+
+  const any = ['knowledge','iterations','filament','procurement','tasks'].some(k=>Array.isArray(obj[k]) && obj[k].length);
+  if(!any) html += '<div class="empty">Nothing structured to save here.</div>';
+  html += `<div class="sheet-actions"><button class="btn full" onclick="applyDigest()" ${any?'':'disabled'}>Apply selected</button><button class="btn ghost" onclick="closeSheet()">Cancel</button></div>`;
+  openSheet(html);
+}
+
+/* ---------- photo intake ---------- */
+function advPickImage(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  if(file.size > 4.5*1024*1024){ toast('Image too big — keep it under ~4MB'); input.value=''; return; }
+  const r = new FileReader();
+  r.onload = ()=>{
+    const res = r.result || '';
+    const comma = res.indexOf(',');
+    advPendingImage = { media_type: file.type || 'image/jpeg', data: res.slice(comma+1) };
+    input.value = '';
+    renderAdvisor();
+    toast('Photo attached');
+  };
+  r.onerror = ()=> toast('Could not read image');
+  r.readAsDataURL(file);
+}
+
+/* ---------- wire into the existing tab system without touching renderAll ---------- */
+(function(){
+  if(typeof window.go === 'function'){
+    const _go = window.go;
+    window.go = function(v){ _go(v); if(v === 'advisor') renderAdvisor(); };
+  }
+  if(document.getElementById('v-advisor-body')) renderAdvisor();
+})();
+</script>
+  
 </body>
 </html>
