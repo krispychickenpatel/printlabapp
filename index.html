@@ -95,6 +95,43 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,22,26,.
 .adv-chip{font-size:11.5px;font-weight:600;padding:7px 10px;border-radius:9px;background:var(--surface2);border:.5px solid var(--line);color:var(--text);text-align:left;line-height:1.3}
 .adv-chip:active{border-color:var(--orange);color:var(--orange)}
 .adv-pend{font-size:11.5px;color:var(--muted);margin-top:7px}
+.adv-cost{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin:-1px 0 8px;
+}
+.adv-cost-box{
+  background:var(--surface2);
+  border:.5px solid var(--line);
+  border-radius:10px;
+  padding:8px 9px;
+  min-width:0;
+}
+.adv-cost-box b{
+  display:block;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.42px;
+  color:var(--dim);
+  margin-bottom:2px;
+}
+.adv-cost-box span{
+  display:block;
+  font-size:12px;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.adv-cost-reset{
+  color:var(--orange);
+  font-size:11px;
+  margin-left:6px;
+}
+@media (max-width:390px){
+  .adv-cost{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -2262,17 +2299,123 @@ const ADVISOR_ENDPOINT = 'https://api.anthropic.com/v1/messages';
 const ADVISOR_KEY_LS   = 'printlab_api_key';
 const ADVISOR_MODEL_LS = 'printlab_api_model';
 const ADVISOR_MODELS = {
-  haiku:  { id:'claude-haiku-4-5-20251001', label:'Haiku · fast',   note:'cheapest — pennies per chat' },
-  sonnet: { id:'claude-sonnet-4-6',         label:'Sonnet · smart', note:'~5× cost, deeper reasoning' }
+  haiku:  {
+    id:'claude-haiku-4-5-20251001',
+    label:'Haiku · fast',
+    note:'cheapest — pennies per chat',
+    inputPerMTok:1,
+    outputPerMTok:5
+  },
+  sonnet: {
+    id:'claude-sonnet-4-6',
+    label:'Sonnet · smart',
+    note:'~3× Haiku cost, deeper reasoning',
+    inputPerMTok:3,
+    outputPerMTok:15
+  }
 };
 
 let advMessages = [];      // in-memory conversation (not persisted, not backed up)
 let advBusy = false;
 let advPendingImage = null; // { media_type, data(base64) }
+let advUsage = {
+  turns:0,
+  input:0,
+  output:0,
+  cacheWrite:0,
+  cacheRead:0,
+  cost:0,
+  last:null
+};
 
 function advKey(){ try{ return localStorage.getItem(ADVISOR_KEY_LS) || ''; }catch(e){ return ''; } }
 function advModel(){ try{ return localStorage.getItem(ADVISOR_MODEL_LS) || 'haiku'; }catch(e){ return 'haiku'; } }
 function setAdvModel(m){ try{ localStorage.setItem(ADVISOR_MODEL_LS, m); }catch(e){} renderAdvisor(); }
+function advTok(n){
+  n = Number(n || 0);
+  if(n >= 1000000) return (n/1000000).toFixed(2)+'M';
+  if(n >= 10000) return Math.round(n/1000)+'k';
+  if(n >= 1000) return (n/1000).toFixed(1)+'k';
+  return String(n);
+}
+
+function advMoney(n){
+  n = Number(n || 0);
+  if(n > 0 && n < 0.0001) return '$'+n.toFixed(6);
+  if(n < 0.01) return '$'+n.toFixed(4);
+  return '$'+n.toFixed(2);
+}
+
+function advRateText(modelKey){
+  const r = ADVISOR_MODELS[modelKey] || ADVISOR_MODELS.haiku;
+  return '$'+r.inputPerMTok+'/M in · $'+r.outputPerMTok+'/M out';
+}
+
+function advCalcCost(modelKey, usage){
+  const r = ADVISOR_MODELS[modelKey] || ADVISOR_MODELS.haiku;
+  usage = usage || {};
+
+  const input = Number(usage.input_tokens || 0);
+  const output = Number(usage.output_tokens || 0);
+  const cacheWrite = Number(usage.cache_creation_input_tokens || 0);
+  const cacheRead = Number(usage.cache_read_input_tokens || 0);
+
+  // Your app does not intentionally use prompt caching yet.
+  // These cache fields are included anyway so the math stays useful if you add caching later.
+  const inputCost = input * r.inputPerMTok / 1000000;
+  const outputCost = output * r.outputPerMTok / 1000000;
+  const cacheWriteCost = cacheWrite * (r.inputPerMTok * 1.25) / 1000000;
+  const cacheReadCost = cacheRead * (r.inputPerMTok * 0.10) / 1000000;
+
+  return {
+    modelKey,
+    input,
+    output,
+    cacheWrite,
+    cacheRead,
+    cost: inputCost + outputCost + cacheWriteCost + cacheReadCost
+  };
+}
+
+function advRecordUsage(u){
+  if(!u) return;
+  advUsage.turns += 1;
+  advUsage.input += u.input || 0;
+  advUsage.output += u.output || 0;
+  advUsage.cacheWrite += u.cacheWrite || 0;
+  advUsage.cacheRead += u.cacheRead || 0;
+  advUsage.cost += u.cost || 0;
+  advUsage.last = u;
+}
+
+function advResetUsage(){
+  advUsage = { turns:0, input:0, output:0, cacheWrite:0, cacheRead:0, cost:0, last:null };
+  renderAdvisor();
+  toast('Cost counter reset');
+}
+
+function advCostHTML(){
+  const last = advUsage.last;
+  if(!last){
+    return `
+      <div class="adv-cost">
+        <div class="adv-cost-box"><b>Last ask</b><span>No API call yet</span></div>
+        <div class="adv-cost-box"><b>This chat</b><span>0 tokens · $0.0000</span></div>
+      </div>`;
+  }
+
+  return `
+    <div class="adv-cost">
+      <div class="adv-cost-box">
+        <b>Last ask</b>
+        <span>${advTok(last.input)} in · ${advTok(last.output)} out · ${advMoney(last.cost)}</span>
+      </div>
+      <div class="adv-cost-box">
+        <b>This chat <span class="adv-cost-reset tap" onclick="advResetUsage()">reset</span></b>
+        <span>${advTok(advUsage.input)} in · ${advTok(advUsage.output)} out · ${advMoney(advUsage.cost)}</span>
+      </div>
+    </div>`;
+}
 
 /* ---------- top-level render ---------- */
 function renderAdvisor(){
@@ -2334,9 +2477,10 @@ function advChatHTML(){
   const suggestions = advMessages.length ? '' :
     `<div class="adv-suggest">${advSuggestions().map(s=>`<button class="adv-chip" onclick="advQuick(this)">${esc(s)}</button>`).join('')}</div>`;
   const body = advMessages.map((mm,i)=>renderAdvMsg(mm,i)).join('') + (advBusy?'<div class="adv-think">Thinking…</div>':'');
-  return `
+    return `
     <div class="adv-model">${modelBtns}</div>
-    <div class="adv-meta">${ADVISOR_MODELS[m].note} · key on this device only · <span class="tap" style="color:var(--orange)" onclick="advClearKey()">remove key</span></div>
+    ${advCostHTML()}
+    <div class="adv-meta">${ADVISOR_MODELS[m].note} · ${advRateText(m)} · USD estimate · key on this device only · <span class="tap" style="color:var(--orange)" onclick="advClearKey()">remove key</span></div>
     ${suggestions}
     <div class="adv-wrap" id="adv-messages">${body || '<div class="empty">Ask anything about your prints, inventory, failures, or what to make next. Answers are grounded in your actual Print Lab data.</div>'}</div>
     <div class="adv-bar">
@@ -2405,8 +2549,11 @@ async function advSend(){
   advBusy = true;
   renderAdvisor();
 
-  try{
-    const reply = await advisorCall();
+    try{
+    const result = await advisorCall();
+    advRecordUsage(result.usageCost);
+
+    const reply = result.text;
     const { clean, payload } = extractSavePayload(reply);
     advMessages.push({ role:'assistant', content:reply, _clean:clean, _payload:payload });
   }catch(err){
@@ -2424,6 +2571,10 @@ function apiMessages(){
 async function advisorCall(){
   const key = advKey();
   if(!key){ const e=new Error('NO_KEY'); throw e; }
+
+  const modelKey = advModel();
+  const modelObj = ADVISOR_MODELS[modelKey] || ADVISOR_MODELS.haiku;
+
   const res = await fetch(ADVISOR_ENDPOINT, {
     method:'POST',
     headers:{
@@ -2433,18 +2584,26 @@ async function advisorCall(){
       'anthropic-dangerous-direct-browser-access':'true'
     },
     body: JSON.stringify({
-      model: ADVISOR_MODELS[advModel()].id,
+      model: modelObj.id,
       max_tokens: 1024,
       system: advSystemPrompt(),
       messages: apiMessages()
     })
   });
+
   if(!res.ok){
     let body=''; try{ body = await res.text(); }catch(e){}
     const e = new Error('HTTP '+res.status); e.status = res.status; e.body = body; throw e;
   }
+
   const data = await res.json();
-  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+  const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+
+  return {
+    text,
+    rawUsage: data.usage || null,
+    usageCost: advCalcCost(modelKey, data.usage || {})
+  };
 }
 
 function advFriendlyError(err){
