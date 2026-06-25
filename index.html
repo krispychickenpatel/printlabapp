@@ -2395,24 +2395,11 @@ function advResetUsage(){
 }
 
 function advCostHTML(){
-  const last = advUsage.last;
-  if(!last){
-    return `
-      <div class="adv-cost">
-        <div class="adv-cost-box"><b>Last ask</b><span>No API call yet</span></div>
-        <div class="adv-cost-box"><b>This chat</b><span>0 tokens · $0.0000</span></div>
-      </div>`;
-  }
-
   return `
-    <div class="adv-cost">
+    <div class="adv-cost" style="grid-template-columns:1fr">
       <div class="adv-cost-box">
-        <b>Last ask</b>
-        <span>${advTok(last.input)} in · ${advTok(last.output)} out · ${advMoney(last.cost)}</span>
-      </div>
-      <div class="adv-cost-box">
-        <b>This chat <span class="adv-cost-reset tap" onclick="advResetUsage()">reset</span></b>
-        <span>${advTok(advUsage.input)} in · ${advTok(advUsage.output)} out · ${advMoney(advUsage.cost)}</span>
+        <b>Session <span class="adv-cost-reset tap" onclick="advResetUsage()">reset</span></b>
+        <span>${advTok(advUsage.input)} in · ${advTok(advUsage.output)} out · ${advMoney(advUsage.cost)} · ${advUsage.turns} turn${advUsage.turns===1?'':'s'}</span>
       </div>
     </div>`;
 }
@@ -2474,15 +2461,14 @@ function advChatHTML(){
   const m = advModel();
   const modelBtns = Object.keys(ADVISOR_MODELS).map(k =>
     `<button class="${m===k?'on':''}" onclick="setAdvModel('${k}')">${ADVISOR_MODELS[k].label}</button>`).join('');
-  const suggestions = advMessages.length ? '' :
-    `<div class="adv-suggest">${advSuggestions().map(s=>`<button class="adv-chip" onclick="advQuick(this)">${esc(s)}</button>`).join('')}</div>`;
+  const suggestions = '';
   const body = advMessages.map((mm,i)=>renderAdvMsg(mm,i)).join('') + (advBusy?'<div class="adv-think">Thinking…</div>':'');
     return `
     <div class="adv-model">${modelBtns}</div>
     ${advCostHTML()}
     <div class="adv-meta">${ADVISOR_MODELS[m].note} · ${advRateText(m)} · USD estimate · key on this device only · <span class="tap" style="color:var(--orange)" onclick="advClearKey()">remove key</span></div>
     ${suggestions}
-    <div class="adv-wrap" id="adv-messages">${body || '<div class="empty">Ask anything about your prints, inventory, failures, or what to make next. Answers are grounded in your actual Print Lab data.</div>'}</div>
+    <div class="adv-wrap" id="adv-messages">${body}</div>
     <div class="adv-bar">
       <input type="file" id="adv-file" accept="image/*" style="display:none" onchange="advPickImage(this)">
       <button class="adv-icon" onclick="document.getElementById('adv-file').click()" title="Attach a print photo">📷</button>
@@ -2697,7 +2683,12 @@ function advPickImage(input){
 (function(){
   if(typeof window.go === 'function'){
     const _go = window.go;
-    window.go = function(v){ _go(v); if(v === 'advisor') renderAdvisor(); };
+    window.go = function(v){
+      _go(v);
+      const capbar = document.querySelector('.capbar');
+      if(capbar) capbar.style.display = v === 'advisor' ? 'none' : '';
+      if(v === 'advisor') renderAdvisor();
+    };
   }
   if(document.getElementById('v-advisor-body')) renderAdvisor();
 })();
